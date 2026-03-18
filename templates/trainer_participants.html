@@ -1,0 +1,335 @@
+{% extends "layout.html" %}
+{% block content %}
+  <style>
+    .participants-layout {
+      display: grid;
+      grid-template-columns: 340px minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+    .participant-cards {
+      display: grid;
+      gap: 10px;
+    }
+    .participant-item {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .participant-item > summary {
+      list-style: none;
+    }
+    .participant-item > summary::-webkit-details-marker {
+      display: none;
+    }
+    .participant-summary {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      cursor: pointer;
+      transition: background .14s ease;
+    }
+    .participant-summary:hover {
+      background: var(--surface-2);
+    }
+    .participant-summary-main {
+      min-width: 0;
+    }
+    .summary-meta {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 2px;
+    }
+    .summary-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .summary-toggle svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+      transition: transform .16s ease;
+    }
+    .participant-item[open] .summary-toggle svg {
+      transform: rotate(180deg);
+    }
+    .participant-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      padding: 12px;
+    }
+    .participant-footer {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--table-line);
+    }
+    .participant-name {
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .participant-username {
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .participant-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .participant-pane {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      background: var(--surface-2);
+      min-width: 0;
+    }
+    .pane-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .pane-title svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+      opacity: .85;
+    }
+    .current-secret {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .secret-input {
+      width: 100%;
+      min-width: 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      letter-spacing: .02em;
+    }
+    .tiny-btn {
+      min-width: 88px;
+      padding: 10px 10px;
+      text-align: center;
+    }
+    .edit-secret {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+    .quick-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+    .participant-empty {
+      padding: 14px;
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      color: var(--muted);
+      text-align: center;
+      background: var(--surface-2);
+    }
+    @media (max-width: 1200px) {
+      .participants-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 900px) {
+      .participant-body {
+        grid-template-columns: 1fr;
+      }
+      .participant-summary {
+        align-items: flex-start;
+      }
+      .current-secret,
+      .edit-secret {
+        grid-template-columns: 1fr;
+      }
+      .tiny-btn {
+        width: 100%;
+      }
+      .quick-row { justify-content: stretch; }
+      .quick-row button { width: 100%; }
+    }
+  </style>
+
+  <div class="page-head">
+    <div>
+      <h2>Partecipanti</h2>
+      <p class="muted">Gestisci utenti, password di accesso e password esame per la sessione attiva.</p>
+    </div>
+    <div class="page-actions">
+      <a class="btn" href="{{ url_for('trainer.dashboard') }}">Indietro</a>
+    </div>
+  </div>
+
+  <div class="participants-layout">
+    <div class="card">
+      <div class="card-head">
+        <h3>Nuovo partecipante</h3>
+      </div>
+      <form method="post" class="stack-md">
+        <input type="hidden" name="action" value="create_participant" />
+        <div class="form-grid-2">
+          <input name="full_name" placeholder="Nome e cognome" required />
+          <input name="username" placeholder="Username" required />
+        </div>
+        <div class="form-grid-1">
+          <input type="password" name="password" placeholder="Password accesso sito" required />
+        </div>
+        <p class="muted">La password esame viene creata quando abiliti l'utente su una sessione attiva.</p>
+        <div class="page-actions">
+          <button type="submit">Crea partecipante</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Elenco partecipanti</h3>
+      </div>
+      {% if active_session %}
+        <p class="muted">Sessione attiva: <strong>{{ active_session.title }}</strong></p>
+      {% else %}
+        <p class="muted">Nessuna sessione attiva: la password esame non e' ancora disponibile.</p>
+      {% endif %}
+      <div class="participant-cards">
+        {% for p in participants %}
+          <details class="participant-item">
+            <summary class="participant-summary">
+              <div class="participant-summary-main">
+                <div class="participant-name">{{ p.full_name }}</div>
+                <div class="summary-meta">@{{ p.username }}</div>
+              </div>
+              <span class="summary-toggle">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41Z"/></svg>
+                <span class="summary-label">Apri</span>
+              </span>
+            </summary>
+
+            <article class="participant-card">
+              <div class="participant-body">
+                <section class="participant-pane">
+                  <div class="pane-title">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2Zm-7-2a2 2 0 1 1 4 0v2h-4V7Zm2 9a2 2 0 0 1-1-3.732V11h2v1.268A2 2 0 0 1 12 16Z"/></svg>
+                    <span>Password accesso</span>
+                  </div>
+                  <div class="current-secret">
+                    <input
+                      id="access_pwd_{{ p.id }}"
+                      type="password"
+                      class="secret-input"
+                      value="{{ p.password_plain or '' }}"
+                      readonly
+                      aria-label="Password accesso {{ p.username }}"
+                    />
+                    <button
+                      type="button"
+                      class="tiny-btn"
+                      data-toggle-target="access_pwd_{{ p.id }}"
+                      data-show-label="Mostra"
+                      data-hide-label="Nascondi"
+                    >
+                      Mostra
+                    </button>
+                  </div>
+                  <form method="post" class="edit-secret">
+                    <input type="hidden" name="action" value="update_access_password" />
+                    <input type="hidden" name="user_id" value="{{ p.id }}" />
+                    <input
+                      type="text"
+                      name="new_access_password"
+                      minlength="6"
+                      placeholder="Nuova password accesso"
+                      required
+                    />
+                    <button type="submit" class="tiny-btn">Salva</button>
+                  </form>
+                </section>
+
+                <section class="participant-pane">
+                  <div class="pane-title">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 4v2h10V7H7Zm0 4v6h2v-6H7Zm4 0v6h2v-6h-2Zm4 0v6h2v-6h-2Z"/></svg>
+                    <span>Password esame sessione</span>
+                  </div>
+                  {% set session_info = session_credentials.get(p.id) if session_credentials else None %}
+                  <input
+                    type="text"
+                    class="secret-input"
+                    value="{{ session_info.exam_password_plain if session_info else '-' }}"
+                    readonly
+                  />
+                  {% if active_session %}
+                    <form method="post" class="edit-secret" style="margin-top:8px;">
+                      <input type="hidden" name="action" value="update_exam_password" />
+                      <input type="hidden" name="user_id" value="{{ p.id }}" />
+                      <input
+                        type="text"
+                        name="new_exam_password"
+                        minlength="4"
+                        placeholder="Nuova password esame"
+                        required
+                      />
+                      <button type="submit" class="tiny-btn">Salva</button>
+                    </form>
+                    <form method="post" class="quick-row">
+                      <input type="hidden" name="action" value="generate_exam_password" />
+                      <input type="hidden" name="user_id" value="{{ p.id }}" />
+                      <input type="hidden" name="username" value="{{ p.username }}" />
+                      <button type="submit" class="tiny-btn">Genera</button>
+                    </form>
+                  {% endif %}
+                </section>
+              </div>
+              <div class="participant-footer">
+                <form method="post" onsubmit="return confirm('Eliminare il partecipante {{ p.full_name }}?');">
+                  <input type="hidden" name="action" value="delete_participant" />
+                  <input type="hidden" name="user_id" value="{{ p.id }}" />
+                  <button type="submit" class="tiny-btn">Elimina</button>
+                </form>
+              </div>
+            </article>
+          </details>
+        {% else %}
+          <div class="participant-empty">Nessun partecipante.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <script>
+    document.querySelectorAll(".participant-item").forEach(function (item) {
+      var label = item.querySelector(".summary-label");
+      var updateLabel = function () {
+        if (!label) return;
+        label.textContent = item.open ? "Chiudi" : "Apri";
+      };
+      updateLabel();
+      item.addEventListener("toggle", updateLabel);
+    });
+
+    document.querySelectorAll("[data-toggle-target]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var input = document.getElementById(btn.dataset.toggleTarget);
+        if (!input) return;
+        var isHidden = input.type === "password";
+        input.type = isHidden ? "text" : "password";
+        btn.textContent = isHidden ? btn.dataset.hideLabel : btn.dataset.showLabel;
+      });
+    });
+  </script>
+{% endblock %}

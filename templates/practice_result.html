@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="hero">
+    <h2>Esercitazione completata</h2>
+    <p class="muted">Blocco {{ block_id }} concluso con riepilogo immediato.</p>
+  </div>
+  <div class="card">
+    <p>Risposte corrette: <strong>{{ correct }}</strong> / {{ total }}</p>
+    <p>Percentuale: <strong>{{ percent }}%</strong></p>
+    <div class="page-actions">
+      <a class="btn" href="{{ url_for('site.dashboard') }}">Torna alla dashboard</a>
+    </div>
+  </div>
+{% endblock %}

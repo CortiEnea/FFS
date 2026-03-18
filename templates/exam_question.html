@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="hero">
+    <h2>Esame in corso</h2>
+    <p class="muted">Domanda {{ index }} di {{ total }} - Tempo residuo: <span class="timer" id="timer"></span></p>
+  </div>
+
+  <div class="card">
+    <p><strong>{{ question.question_text }}</strong></p>
+    <form method="post" class="stack-md">
+      {% for opt in question.options %}
+        {% set i = loop.index0 %}
+        <label style="display:block;">
+          <input
+            type="radio"
+            name="selected_option"
+            value="{{ i }}"
+            {% if answer and answer.selected_option == i %}checked{% endif %}
+          />
+          {{ opt }}
+        </label>
+      {% endfor %}
+
+      <label style="display:block;">
+        <input type="checkbox" name="standby" value="1" {% if answer and answer.is_standby %}checked{% endif %} />
+        Metti questa domanda in standby
+      </label>
+
+      <div class="page-actions">
+        <button type="submit" name="action" value="save_prev">Salva e precedente</button>
+        <button type="submit" name="action" value="save_next">Salva e successiva</button>
+        <button type="submit" name="action" value="review">Vai al riepilogo</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    let left = {{ remaining_seconds }};
+    const timerEl = document.getElementById("timer");
+    const tick = () => {
+      const mm = String(Math.floor(left / 60)).padStart(2, "0");
+      const ss = String(left % 60).padStart(2, "0");
+      timerEl.textContent = `${mm}:${ss}`;
+      if (left <= 0) {
+        window.location.reload();
+        return;
+      }
+      left -= 1;
+      setTimeout(tick, 1000);
+    };
+    tick();
+  </script>
+{% endblock %}

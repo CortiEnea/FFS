@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="page-head">
+    <div>
+      <h2>Pannello esaminatore</h2>
+      <p class="muted">Controllo centralizzato di partecipanti, domande, sessioni e report.</p>
+    </div>
+    <div class="page-actions">
+      <a class="btn" href="{{ url_for('trainer.participants') }}">Partecipanti</a>
+      <a class="btn" href="{{ url_for('trainer.pool') }}">Pool domande</a>
+      <a class="btn" href="{{ url_for('trainer.exam') }}">Esami</a>
+      <a class="btn" href="{{ url_for('trainer.reports') }}">Report</a>
+    </div>
+  </div>
+
+  <div class="grid three">
+    <div class="card">
+      <p class="muted">Esame attivo</p>
+      <p><strong>{{ active_session.title if active_session else "Nessun esame attivo" }}</strong></p>
+      <p class="muted">Domande: {{ active_exam_count }} / {{ required_exam_count }}</p>
+    </div>
+    <div class="card">
+      <p class="muted">Partecipanti</p>
+      <p><strong>{{ participants|length }}</strong></p>
+      <p class="muted">Report completati: {{ reports|length }}</p>
+    </div>
+    <div class="card">
+      <p class="muted">Pool domande</p>
+      <p><strong>B2:</strong> {{ pool_counts[2] }} | <strong>B3:</strong> {{ pool_counts[3] }} | <strong>B4:</strong> {{ pool_counts[4] }}</p>
+    </div>
+  </div>
+{% endblock %}

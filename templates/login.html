@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+{% block content %}
+  <style>
+    .role-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .role-switch input { display: none; }
+    .role-pill {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      color: var(--muted);
+      background: rgba(6, 6, 6, .44);
+      transition: .18s ease;
+      font-weight: 600;
+    }
+    #role-participant:checked + label,
+    #role-trainer:checked + label {
+      color: #fff;
+      border-color: transparent;
+      background: linear-gradient(120deg, var(--brand-1), var(--brand-2));
+      box-shadow: 0 8px 20px rgba(235, 0, 0, .25);
+    }
+  </style>
+  <div class="auth-shell">
+    <div class="hero">
+      <div class="ffs-brand ffs-auth-logo">
+        <span class="ffs-logo" aria-hidden="true">
+          <img src="{{ url_for('static', filename='ffs-logo.svg') }}" alt="Logo FFS" style="width:24px; height:16px; display:block;" />
+        </span>
+        <span class="ffs-brand-text">
+          <strong>FFS Login</strong>
+          <small>Accesso unificato</small>
+        </span>
+      </div>
+      <h2>Accesso</h2>
+      <p class="muted">Scegli il ruolo e inserisci le credenziali.</p>
+    </div>
+    <div class="card">
+      <form method="post" class="stack-md">
+        <div class="role-switch">
+          <input id="role-participant" type="radio" name="role" value="participant" checked />
+          <label class="role-pill" for="role-participant">Partecipante</label>
+          <input id="role-trainer" type="radio" name="role" value="trainer" />
+          <label class="role-pill" for="role-trainer">Formatore</label>
+        </div>
+        <div class="form-grid-1">
+          <input name="username" placeholder="Nome utente" required />
+          <input type="password" name="password" placeholder="Password" required />
+        </div>
+        <div class="page-actions">
+          <button type="submit">Entra</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

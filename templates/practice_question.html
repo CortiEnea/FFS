@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="hero">
+    <h2>Esercitazione blocco {{ block_id }}</h2>
+    <p class="muted">Domanda {{ index }} di {{ total }}</p>
+  </div>
+  <div class="card">
+    <p><strong>{{ question.question_text }}</strong></p>
+    <form method="post" class="stack-md">
+      {% for opt in question.options %}
+        {% set i = loop.index0 %}
+        {% set cls = "" %}
+        {% if feedback %}
+          {% if i == feedback.correct_option %}
+            {% set cls = "answer correct" %}
+          {% elif i == feedback.selected_option and not feedback.is_correct %}
+            {% set cls = "answer wrong" %}
+          {% endif %}
+        {% endif %}
+        <label class="{{ cls }}" style="display:block;">
+          <input
+            type="radio"
+            name="selected_option"
+            value="{{ i }}"
+            {% if feedback and i == feedback.selected_option %}checked{% endif %}
+            {% if feedback %}disabled{% endif %}
+          />
+          {{ opt }}
+        </label>
+      {% endfor %}
+      {% if feedback %}
+        {% if feedback.is_correct %}
+          <p class="ok"><strong>Risposta corretta.</strong></p>
+        {% else %}
+          <p class="ko"><strong>Risposta errata.</strong></p>
+        {% endif %}
+        <div class="page-actions"><button type="submit" name="action" value="next">Prossima domanda</button></div>
+      {% else %}
+        <div class="page-actions"><button type="submit" name="action" value="answer">Conferma risposta</button></div>
+      {% endif %}
+    </form>
+  </div>
+{% endblock %}

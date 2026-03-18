@@ -1,0 +1,250 @@
+{% extends "layout.html" %}
+{% block content %}
+  <style>
+    .pool-page {
+      background: transparent;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      color: var(--text);
+    }
+    .pool-page h2, .pool-page h3 { color: var(--text); }
+    .pool-page .muted, .pool-page .mini { color: var(--muted); }
+    .pool-page .card {
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+    .pool-page .btn,
+    .pool-page button {
+      background: linear-gradient(120deg, var(--brand-1), var(--brand-2));
+      color: #fff;
+      border: none;
+      box-shadow: none;
+    }
+    .pool-page .btn:hover,
+    .pool-page button:hover {
+      background: linear-gradient(120deg, var(--brand-1), var(--brand-2));
+      transform: none;
+      box-shadow: none;
+      filter: brightness(.96);
+    }
+    .pool-page .table-wrap table th {
+      color: var(--th-color);
+      border-bottom-color: var(--table-line);
+    }
+    .pool-page .table-wrap table td {
+      color: var(--text);
+      border-bottom-color: var(--table-line);
+    }
+    .pool-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .pool-table td, .pool-table th { vertical-align: top; }
+    .pool-table .question-text { max-width: 620px; line-height: 1.35; }
+    .pool-header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip { display: inline-block; padding: 4px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 12px; background: rgba(17,24,39,.04); }
+    .pool-desc { margin: 8px 0 0 0; color: var(--muted); }
+    .dialog-form .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .dialog-form .grid-1 { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
+    .dialog-actions { display: flex; gap: 8px; margin-top: 14px; }
+    dialog { width: min(760px, 96vw); border: 1px solid var(--line); border-radius: 12px; padding: 0; box-shadow: 0 10px 30px rgba(0,0,0,.18); background: var(--card-bg); color: var(--text); }
+    dialog::backdrop { background: rgba(0, 0, 0, .35); }
+    .dialog-body { padding: 16px; }
+    .dialog-head { border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 12px; }
+    .correct-row { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; }
+    @media (max-width: 980px) { .pool-grid { grid-template-columns: 1fr; } }
+  </style>
+
+  <div class="pool-page">
+  <div class="page-head">
+    <div><h2>Pool domande</h2><p class="muted">Vista per blocchi, semplice e ordinata.</p></div>
+    <div class="pool-header-actions">
+      <button type="button" id="openCreate">Crea nuova</button>
+      {% if selected_block %}
+        <a class="btn" href="{{ url_for('trainer.pool') }}">Tutti i pool</a>
+      {% endif %}
+      <a class="btn" href="{{ url_for('trainer.dashboard') }}">Indietro</a>
+    </div>
+  </div>
+
+  {% if not selected_block %}
+    <div class="pool-grid">
+      {% for b in [2, 3, 4] %}
+        <div class="card">
+          <div class="card-head">
+            <h3>Pool blocco {{ b }}</h3>
+            <span class="chip">{{ pool_counts[b] }} domande</span>
+          </div>
+          <p class="pool-desc">Contenuto disponibile per il blocco {{ b }}. Apri il pool per modificare o inserire domande.</p>
+          <div class="page-actions" style="margin-top:10px;">
+            <a class="btn" href="{{ url_for('trainer.pool', block=b) }}">Apri pool {{ b }}</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card">
+      <div class="card-head">
+        <h3>Pool blocco {{ selected_block }}</h3>
+        <span class="chip">Mostrate {{ questions|length }} / {{ pool_counts[selected_block] }}</span>
+      </div>
+      {% if hidden_count > 0 %}
+        <p class="muted">Per leggibilità mostro solo le prime {{ show_limit }} domande.</p>
+      {% endif %}
+      <div class="table-wrap">
+        <table class="pool-table">
+          <thead>
+            <tr>
+              <th style="width:70px;">ID</th>
+              <th>Domanda</th>
+              <th style="width:90px;">Corretta</th>
+              <th style="width:120px;">Azione</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for q in questions %}
+              <tr>
+                <td>#{{ q.id }}</td>
+                <td class="question-text">{{ q.question_text }}</td>
+                <td>{{ ["A", "B", "C", "D"][q.correct_option] }}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="edit-btn"
+                    data-id="{{ q.id }}"
+                    data-block="{{ q.block_id }}"
+                    data-question="{{ q.question_text|e }}"
+                    data-opt0="{{ q.options[0]|e }}"
+                    data-opt1="{{ q.options[1]|e }}"
+                    data-opt2="{{ q.options[2]|e }}"
+                    data-opt3="{{ q.options[3]|e }}"
+                    data-correct="{{ q.correct_option }}"
+                  >
+                    Modifica
+                  </button>
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="4">Nessuna domanda presente.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endif %}
+
+  <dialog id="createDialog">
+    <div class="dialog-body">
+      <div class="dialog-head">
+        <h3 style="margin:0;">Crea nuova domanda</h3>
+      </div>
+      <form method="post" class="dialog-form">
+        <input type="hidden" name="action" value="create_question" />
+        <div class="grid">
+          <select name="block_id" required>
+            <option value="2" {% if selected_block == 2 %}selected{% endif %}>Blocco 2</option>
+            <option value="3" {% if selected_block == 3 %}selected{% endif %}>Blocco 3</option>
+            <option value="4" {% if selected_block == 4 %}selected{% endif %}>Blocco 4</option>
+          </select>
+        </div>
+        <div class="grid-1">
+          <textarea name="question_text" placeholder="Testo domanda" required></textarea>
+        </div>
+        <div class="grid">
+          <input name="opt0" placeholder="Opzione A" required />
+          <input name="opt1" placeholder="Opzione B" required />
+          <input name="opt2" placeholder="Opzione C" required />
+          <input name="opt3" placeholder="Opzione D" required />
+        </div>
+        <p style="margin:10px 0 6px;"><strong>Risposta corretta</strong></p>
+        <div class="correct-row">
+          <label><input type="radio" name="correct_option" value="0" checked required /> A</label>
+          <label><input type="radio" name="correct_option" value="1" /> B</label>
+          <label><input type="radio" name="correct_option" value="2" /> C</label>
+          <label><input type="radio" name="correct_option" value="3" /> D</label>
+        </div>
+        <div class="dialog-actions">
+          <button type="submit">Salva</button>
+          <button type="button" class="close-dialog">Annulla</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog id="editDialog">
+    <div class="dialog-body">
+      <div class="dialog-head">
+        <h3 style="margin:0;">Modifica domanda <span id="editTitleId"></span></h3>
+      </div>
+      <form method="post" class="dialog-form">
+        <input type="hidden" name="action" value="update_question" />
+        <input type="hidden" name="question_id" id="editQuestionId" />
+        <div class="grid">
+          <select name="block_id" id="editBlockId" required>
+            <option value="2">Blocco 2</option>
+            <option value="3">Blocco 3</option>
+            <option value="4">Blocco 4</option>
+          </select>
+        </div>
+        <div class="grid-1">
+          <textarea name="question_text" id="editQuestionText" placeholder="Testo domanda" required></textarea>
+        </div>
+        <div class="grid">
+          <input name="opt0" id="editOpt0" placeholder="Opzione A" required />
+          <input name="opt1" id="editOpt1" placeholder="Opzione B" required />
+          <input name="opt2" id="editOpt2" placeholder="Opzione C" required />
+          <input name="opt3" id="editOpt3" placeholder="Opzione D" required />
+        </div>
+        <p style="margin:10px 0 6px;"><strong>Risposta corretta</strong></p>
+        <div class="correct-row">
+          <label><input type="radio" name="correct_option" value="0" id="editCorrect0" required /> A</label>
+          <label><input type="radio" name="correct_option" value="1" id="editCorrect1" /> B</label>
+          <label><input type="radio" name="correct_option" value="2" id="editCorrect2" /> C</label>
+          <label><input type="radio" name="correct_option" value="3" id="editCorrect3" /> D</label>
+        </div>
+        <div class="dialog-actions">
+          <button type="submit">Salva modifiche</button>
+          <button type="button" class="close-dialog">Annulla</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <script>
+    const createDialog = document.getElementById("createDialog");
+    const editDialog = document.getElementById("editDialog");
+    document.getElementById("openCreate").addEventListener("click", () => createDialog.showModal());
+    document.querySelectorAll(".close-dialog").forEach((el) => {
+      el.addEventListener("click", () => {
+        if (createDialog.open) createDialog.close();
+        if (editDialog.open) editDialog.close();
+      });
+    });
+
+    const editTitleId = document.getElementById("editTitleId");
+    const editQuestionId = document.getElementById("editQuestionId");
+    const editBlockId = document.getElementById("editBlockId");
+    const editQuestionText = document.getElementById("editQuestionText");
+    const editOpt0 = document.getElementById("editOpt0");
+    const editOpt1 = document.getElementById("editOpt1");
+    const editOpt2 = document.getElementById("editOpt2");
+    const editOpt3 = document.getElementById("editOpt3");
+
+    document.querySelectorAll(".edit-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        editQuestionId.value = btn.dataset.id;
+        editTitleId.textContent = `#${btn.dataset.id}`;
+        editBlockId.value = btn.dataset.block;
+        editQuestionText.value = btn.dataset.question;
+        editOpt0.value = btn.dataset.opt0;
+        editOpt1.value = btn.dataset.opt1;
+        editOpt2.value = btn.dataset.opt2;
+        editOpt3.value = btn.dataset.opt3;
+        const correct = btn.dataset.correct;
+        const radio = document.getElementById(`editCorrect${correct}`);
+        if (radio) radio.checked = true;
+        editDialog.showModal();
+      });
+    });
+  </script>
+  </div>
+{% endblock %}

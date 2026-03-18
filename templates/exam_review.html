@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="hero">
+    <h2>Riepilogo esame</h2>
+    <p class="muted">Tempo residuo: <span class="timer" id="timer"></span> - Domande senza risposta: <strong>{{ unanswered }}</strong></p>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Domanda</th>
+            <th>Stato</th>
+            <th>Azione</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+            <tr>
+              <td>{{ row.i + 1 }}</td>
+              <td>{{ row.q.question_text }}</td>
+              <td>
+                {% if row.selected is none %}
+                  <span class="ko">Non risposta</span>
+                {% else %}
+                  Risposta salvata
+                {% endif %}
+                {% if row.standby %} - <strong>Standby</strong>{% endif %}
+              </td>
+              <td><a href="{{ url_for('site.exam_goto', position=row.i) }}">Apri</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <form method="post" class="page-actions" style="margin-top:14px;">
+      <button type="submit">Terminare esame</button>
+      <a class="btn" href="{{ url_for('site.exam_question') }}">Torna alle domande</a>
+    </form>
+  </div>
+
+  <script>
+    let left = {{ remaining_seconds }};
+    const timerEl = document.getElementById("timer");
+    const tick = () => {
+      const mm = String(Math.floor(left / 60)).padStart(2, "0");
+      const ss = String(left % 60).padStart(2, "0");
+      timerEl.textContent = `${mm}:${ss}`;
+      if (left <= 0) {
+        window.location.reload();
+        return;
+      }
+      left -= 1;
+      setTimeout(tick, 1000);
+    };
+    tick();
+  </script>
+{% endblock %}

@@ -1,0 +1,52 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.hypothesis/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Build and packaging artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Coverage and test outputs
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.cover
+
+# Flask / local runtime artifacts
+instance/
+*.log
+*.pid
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Secrets and local environment files
+.env
+.env.*
+!.env.example
+
+# IDE / OS noise
+.DS_Store
+.idea/
+.vscode/
+
+# Project-specific local credentials
+CREDENZIALI_TEST.txt

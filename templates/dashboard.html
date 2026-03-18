@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="hero">
+    <h2>Benvenuto {{ full_name }}</h2>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h3>Esercitazione - Blocco 2</h3>
+      <p class="muted">50 domande casuali dal pool con esito risposta immediato.</p>
+      <a class="btn" href="{{ url_for('site.practice_start', block_id=2) }}">Avvia blocco 2</a>
+    </div>
+    <div class="card">
+      <h3>Esercitazione - Blocco 3</h3>
+      <p class="muted">Stessa modalità del blocco 2 con set domande dedicato.</p>
+      <a class="btn" href="{{ url_for('site.practice_start', block_id=3) }}">Avvia blocco 3</a>
+    </div>
+    <div class="card">
+      <h3>Esercitazione - Blocco 4</h3>
+      <p class="muted">Percorso finale esercitazioni con correzione immediata.</p>
+      <a class="btn" href="{{ url_for('site.practice_start', block_id=4) }}">Avvia blocco 4</a>
+    </div>
+    <div class="card">
+      <h3>Esami</h3>
+      <p class="muted">Accesso con password esame personale, timer attivo e nessun feedback immediato.</p>
+      <a class="btn" href="{{ url_for('site.exam_start') }}">Vai agli esami</a>
+    </div>
+  </div>
+{% endblock %}

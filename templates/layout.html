@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title or "FFS Quiz" }}</title>
+    <style>
+      @import url("https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&display=swap");
+      :root {
+        --brand-1: #eb0000;
+        --brand-2: #c60018;
+        --brand-3: #ff3a3a;
+        --surface-0: #f4f5f7;
+        --surface-1: #ffffff;
+        --surface-2: #f9fafb;
+        --glass: rgba(24, 24, 27, 0.68);
+        --text: #121317;
+        --muted: #5f6673;
+        --line: rgba(17, 24, 39, 0.12);
+        --ok: #45d490;
+        --ko: #ff8b8b;
+        --radius: 16px;
+        --shadow: 0 22px 50px rgba(0, 0, 0, 0.32);
+        --header-bg: linear-gradient(120deg, rgba(235, 0, 0, .95), rgba(198, 0, 24, .95));
+        --main-bg: linear-gradient(145deg, rgba(255,255,255,.96), rgba(248,249,251,.96));
+        --card-bg: #ffffff;
+        --input-bg: #ffffff;
+        --hero-bg: rgba(235, 0, 0, 0.08);
+        --hero-border: rgba(235, 0, 0, .24);
+        --table-line: rgba(17, 24, 39, 0.09);
+        --nav-hover: rgba(255, 255, 255, .16);
+        --th-color: #2f3746;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        color: var(--text);
+        font-family: "Satoshi", "Inter", "Segoe UI", Roboto, Arial, sans-serif;
+        background:
+          radial-gradient(900px 420px at -10% -10%, rgba(235, 0, 0, 0.08), transparent),
+          radial-gradient(900px 420px at 120% -20%, rgba(235, 0, 0, 0.05), transparent),
+          var(--surface-0);
+        min-height: 100vh;
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        backdrop-filter: blur(8px);
+        background: var(--header-bg);
+        color: #fff;
+        border-bottom: 1px solid var(--line);
+        padding: 14px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      header strong { letter-spacing: .2px; }
+      header a {
+        color: #fff;
+        text-decoration: none;
+        font-size: 14px;
+        padding: 7px 10px;
+        border-radius: 8px;
+        transition: background .18s ease, color .18s ease;
+      }
+      header a:hover { color: #fff; background: var(--nav-hover); }
+      main {
+        max-width: 1240px;
+        margin: 24px auto 34px;
+        background: var(--main-bg);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 22px;
+        box-shadow: 0 8px 18px rgba(0, 0, 0, .14);
+        animation: fade-in .35s ease;
+      }
+      h2, h3 { margin-top: 0; margin-bottom: 8px; letter-spacing: .1px; }
+      .muted { color: var(--muted); }
+      .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+      .grid { display: grid; gap: 12px; }
+      .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .stack-sm > * + * { margin-top: 8px; }
+      .stack-md > * + * { margin-top: 12px; }
+      .stack-lg > * + * { margin-top: 16px; }
+      .page-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
+      .page-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+      .card-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+      .table-wrap { overflow-x: auto; }
+      .split-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .form-grid-1 { display: grid; grid-template-columns: 1fr; gap: 10px; }
+      .card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 16px;
+        margin-bottom: 12px;
+        background: var(--card-bg);
+        box-shadow: none;
+      }
+      .ok { color: var(--ok); }
+      .ko { color: var(--ko); }
+      .flash {
+        padding: 10px 12px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        animation: slide-down .25s ease;
+      }
+      .flash.success { background: rgba(69, 212, 144, .14); border: 1px solid rgba(69, 212, 144, .42); }
+      .flash.error { background: rgba(255, 122, 142, .14); border: 1px solid rgba(255, 122, 142, .42); }
+      input, select, textarea, button {
+        font: inherit;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(154, 167, 204, 0.34);
+      }
+      input:focus, select:focus, textarea:focus {
+        outline: none;
+        border-color: rgba(235, 0, 0, 0.75);
+        box-shadow: 0 0 0 3px rgba(235, 0, 0, 0.12);
+      }
+      input, select, textarea {
+        color: var(--text);
+        background: var(--input-bg);
+      }
+      input::placeholder, textarea::placeholder { color: #8c94a3; }
+      textarea { width: 100%; min-height: 86px; resize: vertical; }
+      button {
+        cursor: pointer;
+        border: none;
+        color: #fff;
+        background: linear-gradient(120deg, var(--brand-1), var(--brand-2));
+        transition: transform .14s ease, box-shadow .14s ease, opacity .18s ease;
+        font-weight: 600;
+      }
+      button:hover { transform: translateY(-1px); box-shadow: 0 8px 16px rgba(235, 0, 0, .16); }
+      button:disabled { cursor: not-allowed; opacity: .6; transform: none; box-shadow: none; }
+      a.btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        color: #fff;
+        border-radius: 10px;
+        padding: 10px 12px;
+        background: linear-gradient(120deg, var(--brand-1), var(--brand-2));
+        transition: transform .14s ease, box-shadow .14s ease, opacity .18s ease;
+        font-weight: 600;
+      }
+      a.btn:hover { transform: translateY(-1px); box-shadow: 0 8px 16px rgba(235, 0, 0, .16); }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { text-align: left; border-bottom: 1px solid var(--table-line); padding: 10px; }
+      th {
+        color: var(--th-color);
+        font-weight: 700;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+      }
+      .timer {
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(120deg, var(--brand-1), var(--brand-3));
+        padding: 6px 10px;
+        border-radius: 999px;
+      }
+      .answer.correct { background: rgba(69, 212, 144, .12); border: 1px solid rgba(69, 212, 144, .38); padding: 10px; border-radius: 10px; }
+      .answer.wrong { background: rgba(255, 122, 142, .12); border: 1px solid rgba(255, 122, 142, .38); padding: 10px; border-radius: 10px; }
+      .hero {
+        border-radius: 16px;
+        border: 1px solid var(--hero-border);
+        background: var(--hero-bg);
+        padding: 16px;
+        margin-bottom: 14px;
+      }
+      .auth-shell {
+        max-width: 560px;
+        margin: 18px auto;
+      }
+      .ffs-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .ffs-logo {
+        width: 38px;
+        height: 26px;
+        border-radius: 8px;
+        background: linear-gradient(120deg, var(--brand-1), var(--brand-2));
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 16px rgba(235, 0, 0, 0.22);
+      }
+      .ffs-logo svg { width: 24px; height: 16px; display: block; }
+      .ffs-brand-text {
+        display: inline-flex;
+        flex-direction: column;
+        line-height: 1.1;
+      }
+      .ffs-brand-text small {
+        font-size: 11px;
+        letter-spacing: .08em;
+        color: #ffd0d4;
+      }
+      .ffs-auth-logo {
+        margin-bottom: 8px;
+      }
+      @keyframes fade-in {
+        from { opacity: .4; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes slide-down {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @media (max-width: 980px) {
+        .grid.two, .grid.three, .split-2, .form-grid-2 { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 900px) {
+        main { margin: 12px; padding: 14px; border-radius: 14px; }
+        header { padding: 12px 14px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="ffs-brand">
+        <span class="ffs-logo" aria-hidden="true">
+          <img src="{{ url_for('static', filename='ffs-logo.svg') }}" alt="Logo FFS" style="width:24px; height:16px; display:block;" />
+        </span>
+        <span class="ffs-brand-text">
+          <strong>FFS Training Platform</strong>
+          <small>SBB CFF FFS</small>
+        </span>
+      </div>
+      <nav>
+        {% if session.get("user_id") %}
+          <a href="{{ url_for('site.dashboard') }}">Dashboard</a>
+          <a href="{{ url_for('site.logout') }}">Logout</a>
+        {% endif %}
+        {% if session.get("trainer_id") %}
+          <a href="{{ url_for('trainer.dashboard') }}">Pannello Formatore</a>
+          <a href="{{ url_for('trainer.logout') }}">Logout Formatore</a>
+        {% endif %}
+        {% if not session.get("user_id") and not session.get("trainer_id") %}
+          <a href="{{ url_for('site.login') }}">Login</a>
+        {% endif %}
+      </nav>
+    </header>
+    <main>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+  </html>

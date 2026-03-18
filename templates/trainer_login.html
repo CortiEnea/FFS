@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="auth-shell">
+    <div class="hero">
+      <div class="ffs-brand ffs-auth-logo">
+        <span class="ffs-logo" aria-hidden="true">
+          <svg viewBox="0 0 64 40" role="img">
+            <rect x="0" y="0" width="64" height="40" rx="8" fill="none"/>
+            <path d="M6 20h52" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+            <path d="M23 8l-8 12 8 12" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path d="M41 8l8 12-8 12" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+        </span>
+        <span class="ffs-brand-text">
+          <strong>FFS Login</strong>
+          <small>Area esaminatore</small>
+        </span>
+      </div>
+      <h2>Accesso esaminatore</h2>
+      <p class="muted">Area gestione FFS: sessioni, partecipanti, domande e report.</p>
+    </div>
+    <div class="card">
+      <form method="post" class="stack-md">
+        <div class="form-grid-1">
+          <input name="username" placeholder="Username" required />
+          <input type="password" name="password" placeholder="Password" required />
+        </div>
+        <div class="page-actions">
+          <button type="submit">Entra</button>
+          <a class="btn" href="{{ url_for('site.login') }}">Accesso partecipante</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="hero">
+    <h2>Avvio esame</h2>
+    <p class="muted">Verifica dati sessione e inserisci la password esame personale per iniziare.</p>
+  </div>
+
+  <div class="split-2">
+    <div class="card">
+      <h3>Sessione attiva</h3>
+      <p><strong>{{ exam_session.title }}</strong></p>
+      <p class="muted">Domande: {{ question_count }}</p>
+      <p class="muted">Durata: {{ exam_session.duration_minutes }} minuti</p>
+    </div>
+    <div class="card">
+      <h3>Accesso</h3>
+      <p class="muted">Inserisci la password esame dedicata al tuo utente.</p>
+      <form method="post" class="stack-md">
+        <input type="password" name="exam_password" placeholder="Password esame" required />
+        <div class="page-actions">
+          <button type="submit">Inizia esame</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

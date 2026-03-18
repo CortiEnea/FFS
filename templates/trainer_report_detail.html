@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+{% block content %}
+  <div class="page-head">
+    <div>
+      <h2>Report tentativo #{{ report.attempt.id }}</h2>
+      <p class="muted">Dettaglio completo risposte, errori e punteggio.</p>
+    </div>
+    <div class="page-actions">
+      <a class="btn" href="{{ url_for('trainer.reports') }}">Indietro</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <p><strong>Partecipante:</strong> {{ report.user.full_name }} ({{ report.user.username }})</p>
+    <p><strong>Sessione:</strong> {{ report.session.title }}</p>
+    <p><strong>Punteggio:</strong> {{ report.scored_points }} / {{ report.total_points }}</p>
+    <p><strong>Percentuale:</strong> {{ report.percent }}%</p>
+    <p>
+      <strong>Esito:</strong>
+      {% if report.passed %}
+        <span class="ok">Sufficiente (>=60%)</span>
+      {% else %}
+        <span class="ko">Insufficiente (&lt;60%)</span>
+      {% endif %}
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>Dettaglio risposte ed errori</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Domanda</th>
+            <th>Risposta data</th>
+            <th>Corretta</th>
+            <th>Esito</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in report.rows %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ row.question.question_text }}</td>
+              <td>
+                {% if row.selected_option is none %}
+                  Non risposta
+                {% else %}
+                  {{ row.question.options[row.selected_option] }}
+                {% endif %}
+              </td>
+              <td>{{ row.question.options[row.question.correct_option] }}</td>
+              <td>
+                {% if row.is_correct %}
+                  <span class="ok">Corretta</span>
+                {% else %}
+                  <span class="ko">Errore</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}
