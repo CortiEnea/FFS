@@ -31,7 +31,7 @@
       <table>
         <thead>
           <tr>
-            <th>#</th>
+            <th>N.</th>
             <th>Domanda</th>
             <th>Risposta data</th>
             <th>Corretta</th>
@@ -42,15 +42,61 @@
           {% for row in report.rows %}
             <tr>
               <td>{{ loop.index }}</td>
-              <td>{{ row.question.question_text }}</td>
               <td>
-                {% if row.selected_option is none %}
-                  Non risposta
-                {% else %}
-                  {{ row.question.options[row.selected_option] }}
+                {{ row.question.question_text }}
+                {% if row.question.image_url %}
+                  <div style="margin-top:6px;">
+                    <img
+                      src="{{ row.question.image_url }}"
+                      alt="Immagine domanda {{ loop.index }}"
+                      style="max-width:140px; max-height:90px; border:1px solid var(--line); border-radius:8px; object-fit:cover;"
+                    />
+                  </div>
                 {% endif %}
               </td>
-              <td>{{ row.question.options[row.question.correct_option] }}</td>
+              {% set kind = (row.question.question_kind or 'single') %}
+              <td>
+                {% if kind == 'number' %}
+                  {% set given = (row.answer.selected_number or '') if row.answer else '' %}
+                  {{ given if given else 'Non risposta' }}
+                {% elif kind == 'multi_many' %}
+                  {% set sel = (row.answer.selected_options or []) if row.answer else [] %}
+                  {% if sel %}
+                    {%- set out = [] -%}
+                    {%- for i in sel -%}
+                      {%- if i in (0,1,2,3) and row.question.options|length > i -%}
+                        {%- set _ = out.append(["A","B","C","D"][i]) -%}
+                      {%- endif -%}
+                    {%- endfor -%}
+                    {{ out|join(", ") }}
+                  {% else %}
+                    Non risposta
+                  {% endif %}
+                {% else %}
+                  {% set sel = row.answer.selected_option if row.answer else None %}
+                  {% if sel is none %}
+                    Non risposta
+                  {% else %}
+                    {{ row.question.options[sel] }}
+                  {% endif %}
+                {% endif %}
+              </td>
+              <td>
+                {% if kind == 'number' %}
+                  {{ row.question.correct_number or '—' }}
+                {% elif kind == 'multi_many' %}
+                  {% set corr = (row.question.correct_options or []) %}
+                  {%- set out = [] -%}
+                  {%- for i in corr -%}
+                    {%- if i in (0,1,2,3) -%}
+                      {%- set _ = out.append(["A","B","C","D"][i]) -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                  {{ out|join(", ") }}
+                {% else %}
+                  {{ row.question.options[row.question.correct_option] }}
+                {% endif %}
+              </td>
               <td>
                 {% if row.is_correct %}
                   <span class="ok">Corretta</span>

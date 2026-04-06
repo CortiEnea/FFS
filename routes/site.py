@@ -47,10 +47,10 @@ def login():
                 flash("Credenziali formatore non valide.", "error")
                 return redirect(url_for("site.login"))
 
-            session.pop("user_id", None)
-            session.pop("user_full_name", None)
+            session.clear()
             session["trainer_id"] = user["id"]
             session["trainer_name"] = user["full_name"]
+            session["trainer_is_admin"] = bool(user.get("is_admin"))
             flash("Accesso formatore effettuato.", "success")
             return redirect(url_for("trainer.dashboard"))
 
@@ -62,8 +62,7 @@ def login():
             flash("Password errata.", "error")
             return redirect(url_for("site.login"))
 
-        session.pop("trainer_id", None)
-        session.pop("trainer_name", None)
+        session.clear()
         session["user_id"] = user["id"]
         session["user_full_name"] = user["full_name"]
         flash("Accesso effettuato.", "success")
@@ -83,7 +82,19 @@ def logout():
 def dashboard():
     if not _participant_required():
         return redirect(url_for("site.login"))
-    return render_template("dashboard.html", full_name=session.get("user_full_name"))
+    uid = session["user_id"]
+    pool_history = {}
+    for bid in (2, 3, 4):
+        attempts = db.list_pool_attempts(uid, bid)
+        pool_history[bid] = {
+            "count": len(attempts),
+            "last": attempts[0] if attempts else None,
+        }
+    return render_template(
+        "dashboard.html",
+        full_name=session.get("user_full_name"),
+        pool_history=pool_history,
+    )
 
 
 @site.route("/practice/<int:block_id>/start", methods=["GET"])
@@ -94,20 +105,21 @@ def practice_start(block_id: int):
         flash("Blocco non valido.", "error")
         return redirect(url_for("site.dashboard"))
 
-    available = db.count_pool_questions(block_id)
+    available = db.count_pool_questions_total()
     if available < PRACTICE_QUESTION_COUNT:
         flash(
-            f"Per avviare il blocco {block_id} servono almeno {PRACTICE_QUESTION_COUNT} domande nel pool.",
+            f"Per avviare l'esercitazione servono almeno {PRACTICE_QUESTION_COUNT} domande nel pool.",
             "error",
         )
         return redirect(url_for("site.dashboard"))
-    questions = db.get_pool_questions_for_block(block_id, amount=PRACTICE_QUESTION_COUNT)
+    questions = db.get_pool_questions_random(amount=PRACTICE_QUESTION_COUNT)
 
     session["practice"] = {
         "block_id": block_id,
         "question_ids": [q["id"] for q in questions],
         "index": 0,
         "correct_count": 0,
+        "answered_count": 0,
         "last_feedback": None,
     }
     return redirect(url_for("site.practice_question", block_id=block_id))
@@ -122,10 +134,20 @@ def practice_question(block_id: int):
     if not state or state.get("block_id") != block_id:
         return redirect(url_for("site.practice_start", block_id=block_id))
 
-    questions = db.list_pool_questions(block_id)
+    questions = db.list_pool_questions(None)
     by_id = {q["id"]: q for q in questions}
     qids = state["question_ids"]
     idx = state["index"]
+
+    # Jump to a specific question number (1-based) via query param.
+    jump_raw = (request.args.get("q") or "").strip()
+    if jump_raw.isdigit():
+        jump = int(jump_raw)
+        if 1 <= jump <= len(qids):
+            state["index"] = jump - 1
+            state["last_feedback"] = None
+            session["practice"] = state
+            idx = state["index"]
 
     if idx >= len(qids):
         return redirect(url_for("site.practice_result", block_id=block_id))
@@ -139,6 +161,24 @@ def practice_question(block_id: int):
 
     if request.method == "POST":
         action = request.form.get("action", "answer")
+        if action == "exit":
+            session.pop("practice", None)
+            return redirect(url_for("site.dashboard"))
+        if action == "finish":
+            total = len(qids)
+            db.save_pool_attempt(
+                session["user_id"], block_id, total,
+                state["correct_count"], state.get("answered_count", 0),
+            )
+            session.pop("practice", None)
+            flash("Esercitazione completata e salvata.", "success")
+            return redirect(url_for("site.pool_history", block_id=block_id))
+        if action == "prev":
+            if state["index"] > 0:
+                state["index"] -= 1
+            state["last_feedback"] = None
+            session["practice"] = state
+            return redirect(url_for("site.practice_question", block_id=block_id))
         if action == "next":
             state["index"] += 1
             state["last_feedback"] = None
@@ -147,28 +187,71 @@ def practice_question(block_id: int):
                 return redirect(url_for("site.practice_result", block_id=block_id))
             return redirect(url_for("site.practice_question", block_id=block_id))
 
-        selected = request.form.get("selected_option")
-        if selected is None:
-            flash("Seleziona una risposta.", "error")
-            return redirect(url_for("site.practice_question", block_id=block_id))
-
-        try:
-            selected_int = int(selected)
-        except ValueError:
-            flash("Risposta non valida.", "error")
-            return redirect(url_for("site.practice_question", block_id=block_id))
-        if selected_int not in (0, 1, 2, 3):
-            flash("Risposta non valida.", "error")
-            return redirect(url_for("site.practice_question", block_id=block_id))
-        is_correct = selected_int == current["correct_option"]
-        if is_correct:
-            state["correct_count"] += 1
-
-        state["last_feedback"] = {
-            "selected_option": selected_int,
-            "correct_option": current["correct_option"],
-            "is_correct": is_correct,
-        }
+        kind = (current.get("question_kind") or "single").strip().lower()
+        if kind == "number":
+            ans = (request.form.get("number_answer") or "").strip()
+            if not ans or not ans.isdigit():
+                flash("Inserisci solo numeri.", "error")
+                return redirect(url_for("site.practice_question", block_id=block_id))
+            correct = (current.get("correct_number") or "").strip()
+            is_correct = ans == correct
+            if is_correct:
+                state["correct_count"] += 1
+            state["last_feedback"] = {
+                "kind": "number",
+                "selected_number": ans,
+                "correct_number": correct,
+                "is_correct": is_correct,
+            }
+        elif kind in ("multi_one", "multi_many"):
+            raw = request.form.getlist("selected_options")
+            if not raw:
+                flash("Seleziona almeno una risposta.", "error")
+                return redirect(url_for("site.practice_question", block_id=block_id))
+            try:
+                selected = sorted({int(x) for x in raw})
+            except ValueError:
+                flash("Risposta non valida.", "error")
+                return redirect(url_for("site.practice_question", block_id=block_id))
+            if any(i not in (0, 1, 2, 3) for i in selected):
+                flash("Risposta non valida.", "error")
+                return redirect(url_for("site.practice_question", block_id=block_id))
+            if kind == "multi_one" and len(selected) != 1:
+                flash("Seleziona una sola risposta.", "error")
+                return redirect(url_for("site.practice_question", block_id=block_id))
+            correct = sorted({int(x) for x in (current.get("correct_options") or [])})
+            is_correct = selected == correct
+            if is_correct:
+                state["correct_count"] += 1
+            state["last_feedback"] = {
+                "kind": kind,
+                "selected_options": selected,
+                "correct_options": correct,
+                "is_correct": is_correct,
+            }
+        else:
+            selected_raw = request.form.get("selected_option")
+            if selected_raw is None:
+                flash("Seleziona una risposta.", "error")
+                return redirect(url_for("site.practice_question", block_id=block_id))
+            try:
+                selected_int = int(selected_raw)
+            except ValueError:
+                flash("Risposta non valida.", "error")
+                return redirect(url_for("site.practice_question", block_id=block_id))
+            if selected_int not in (0, 1, 2, 3):
+                flash("Risposta non valida.", "error")
+                return redirect(url_for("site.practice_question", block_id=block_id))
+            is_correct = selected_int == int(current["correct_option"])
+            if is_correct:
+                state["correct_count"] += 1
+            state["last_feedback"] = {
+                "kind": "single",
+                "selected_option": selected_int,
+                "correct_option": int(current["correct_option"]),
+                "is_correct": is_correct,
+            }
+        state["answered_count"] = state.get("answered_count", 0) + 1
         session["practice"] = state
         feedback = state["last_feedback"]
 
@@ -192,14 +275,25 @@ def practice_result(block_id: int):
 
     total = len(state["question_ids"])
     correct = state["correct_count"]
+    answered = state.get("answered_count", 0)
     percent = round((correct / total) * 100, 2) if total else 0
+    db.save_pool_attempt(session["user_id"], block_id, total, correct, answered)
     session.pop("practice", None)
+    flash("Esercitazione completata e salvata.", "success")
+    return redirect(url_for("site.pool_history", block_id=block_id))
+
+
+@site.get("/practice/<int:block_id>/history")
+def pool_history(block_id: int):
+    if not _participant_required():
+        return redirect(url_for("site.login"))
+    if block_id not in (2, 3, 4):
+        return redirect(url_for("site.dashboard"))
+    attempts = db.list_pool_attempts(session["user_id"], block_id)
     return render_template(
-        "practice_result.html",
+        "pool_history.html",
         block_id=block_id,
-        total=total,
-        correct=correct,
-        percent=percent,
+        attempts=attempts,
     )
 
 
@@ -290,23 +384,63 @@ def exam_question():
         pos = len(questions) - 1
     current = questions[pos]
     existing = answers_map.get(current["id"])
+    nav_items = []
+    for i, q in enumerate(questions):
+        ans = answers_map.get(q["id"])
+        qk = (q.get("question_kind") or "single").strip().lower()
+        if ans is None:
+            answered = False
+        elif qk == "number":
+            answered = bool((ans.get("selected_number") or "").strip())
+        elif qk == "multi_many":
+            answered = bool(ans.get("selected_options"))
+        else:
+            answered = ans.get("selected_option") is not None
+        nav_items.append(
+            {
+                "pos": i,
+                "answered": answered,
+                "standby": bool(ans.get("is_standby")) if ans else False,
+            }
+        )
 
     if request.method == "POST":
         action = request.form.get("action", "save_next")
-        selected_raw = request.form.get("selected_option")
-        if selected_raw in (None, ""):
-            selected = None
-        else:
-            try:
-                selected = int(selected_raw)
-            except ValueError:
-                flash("Risposta non valida.", "error")
-                return redirect(url_for("site.exam_question"))
-            if selected not in (0, 1, 2, 3):
-                flash("Risposta non valida.", "error")
-                return redirect(url_for("site.exam_question"))
         standby = bool(request.form.get("standby"))
-        db.save_exam_answer(attempt_id, current["id"], selected, standby)
+        kind = (current.get("question_kind") or "single").strip().lower()
+
+        selected = None
+        selected_options = None
+        selected_number = None
+
+        if kind == "number":
+            selected_number = (request.form.get("number_answer") or "").strip()
+        elif kind == "multi_many":
+            raw = request.form.getlist("selected_options")
+            if raw:
+                try:
+                    selected_options = sorted({int(x) for x in raw})
+                except ValueError:
+                    pass
+        else:
+            selected_raw = request.form.get("selected_option")
+            if selected_raw not in (None, ""):
+                try:
+                    selected = int(selected_raw)
+                except ValueError:
+                    pass
+                else:
+                    if selected not in (0, 1, 2, 3):
+                        selected = None
+
+        db.save_exam_answer(
+            attempt_id,
+            current["id"],
+            selected,
+            standby,
+            selected_options=selected_options,
+            selected_number=selected_number,
+        )
 
         if action == "save_next":
             session["exam_position"] = min(pos + 1, len(questions) - 1)
@@ -325,6 +459,7 @@ def exam_question():
         total=len(questions),
         answer=existing,
         remaining_seconds=remaining,
+        nav_items=nav_items,
     )
 
 
@@ -363,11 +498,19 @@ def exam_review():
     unanswered = 0
     for i, q in enumerate(questions):
         ans = answers_map.get(q["id"])
-        selected = ans["selected_option"] if ans else None
         standby = bool(ans["is_standby"]) if ans else False
-        if selected is None:
+        qk = (q.get("question_kind") or "single").strip().lower()
+        if ans is None:
+            has_answer = False
+        elif qk == "number":
+            has_answer = bool((ans.get("selected_number") or "").strip())
+        elif qk == "multi_many":
+            has_answer = bool(ans.get("selected_options"))
+        else:
+            has_answer = ans.get("selected_option") is not None
+        if not has_answer:
             unanswered += 1
-        rows.append({"i": i, "q": q, "selected": selected, "standby": standby})
+        rows.append({"i": i, "q": q, "has_answer": has_answer, "standby": standby})
 
     if request.method == "POST":
         if unanswered > 0:

@@ -1,0 +1,113 @@
+{% extends "layout.html" %}
+{% block content %}
+  <style>
+    .history-grid { display: grid; gap: 12px; }
+    .attempt-card {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 16px 20px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .attempt-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: rgba(17, 24, 39, .06);
+      font-weight: 900;
+      font-size: 15px;
+      color: var(--th-color);
+      flex-shrink: 0;
+    }
+    .attempt-info { min-width: 0; }
+    .attempt-info .attempt-date { font-size: 13px; color: var(--muted); }
+    .attempt-stats {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .stat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 14px;
+    }
+    .stat-pill.score {
+      background: rgba(17, 24, 39, .06);
+      color: var(--th-color);
+    }
+    .stat-pill.percent-good {
+      background: rgba(69, 212, 144, .12);
+      color: #15803d;
+    }
+    .stat-pill.percent-mid {
+      background: rgba(251, 191, 36, .14);
+      color: #92400e;
+    }
+    .stat-pill.percent-bad {
+      background: rgba(255, 122, 142, .12);
+      color: #be123c;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+    .empty-state svg { width: 48px; height: 48px; fill: currentColor; opacity: .4; margin-bottom: 12px; }
+    @media (max-width: 600px) {
+      .attempt-card { grid-template-columns: 1fr; gap: 10px; }
+      .attempt-stats { flex-wrap: wrap; }
+    }
+  </style>
+
+  <div class="hero">
+    <h2>Storico — Blocco {{ block_id }}</h2>
+    <p class="muted">Tutte le esercitazioni completate per questo blocco.</p>
+  </div>
+
+  {% if attempts %}
+    <div class="history-grid">
+    {% for a in attempts %}
+      <div class="attempt-card">
+        <div class="attempt-number">{{ loop.revindex }}</div>
+        <div class="attempt-info">
+          <strong>{{ a.correct_count }} / {{ a.total_questions }} corrette</strong>
+          <span style="color:var(--muted); font-size:13px; margin-left:6px;">({{ a.answered_count }} risposte date)</span>
+          <div class="attempt-date">{{ a.completed_at|swiss_date }}</div>
+        </div>
+        <div class="attempt-stats">
+          <span class="stat-pill score">{{ a.correct_count }}/{{ a.total_questions }}</span>
+          {% if a.percent >= 60 %}
+            <span class="stat-pill percent-good">{{ a.percent }}%</span>
+          {% elif a.percent >= 40 %}
+            <span class="stat-pill percent-mid">{{ a.percent }}%</span>
+          {% else %}
+            <span class="stat-pill percent-bad">{{ a.percent }}%</span>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+    </div>
+  {% else %}
+    <div class="card empty-state">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm-1 7V3.5L18.5 9H13ZM6 20V4h6v6h6v10H6Z"/></svg>
+      <p><strong>Nessuna esercitazione completata</strong></p>
+      <p>Avvia un'esercitazione per vedere i risultati qui.</p>
+    </div>
+  {% endif %}
+
+  <div class="page-actions">
+    <a class="btn" href="{{ url_for('site.dashboard') }}">Torna alla dashboard</a>
+    <a class="btn" href="{{ url_for('site.practice_start', block_id=block_id) }}" style="margin-left:8px;">Nuova esercitazione</a>
+  </div>
+{% endblock %}

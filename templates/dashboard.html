@@ -1,29 +1,90 @@
 {% extends "layout.html" %}
 {% block content %}
+  <style>
+    .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .dash-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 20px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+    .dash-card h3 { margin: 0 0 2px 0; }
+    @media (max-width: 640px) {
+      .dash-grid { grid-template-columns: 1fr; }
+    }
+    .dash-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto; padding-top: 4px; }
+    .dash-actions .btn { font-size: 13px; padding: 8px 14px; }
+    .dash-actions .btn-outline {
+      background: #fff;
+      border: 1px solid var(--line);
+      color: var(--text);
+      font-weight: 800;
+      border-radius: 12px;
+      padding: 8px 14px;
+      font-size: 13px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    .dash-actions .btn-outline:hover { background: var(--surface-2); }
+    .pool-last {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: var(--surface-2);
+      font-size: 13px;
+    }
+    .pool-last .pool-pct {
+      font-weight: 800;
+      margin-left: auto;
+    }
+    .pool-pct.good { color: #15803d; }
+    .pool-pct.mid { color: #92400e; }
+    .pool-pct.bad { color: #be123c; }
+  </style>
+
   <div class="hero">
     <h2>Benvenuto {{ full_name }}</h2>
   </div>
 
-  <div class="grid two">
-    <div class="card">
-      <h3>Esercitazione - Blocco 2</h3>
-      <p class="muted">50 domande casuali dal pool con esito risposta immediato.</p>
-      <a class="btn" href="{{ url_for('site.practice_start', block_id=2) }}">Avvia blocco 2</a>
-    </div>
-    <div class="card">
-      <h3>Esercitazione - Blocco 3</h3>
-      <p class="muted">Stessa modalità del blocco 2 con set domande dedicato.</p>
-      <a class="btn" href="{{ url_for('site.practice_start', block_id=3) }}">Avvia blocco 3</a>
-    </div>
-    <div class="card">
-      <h3>Esercitazione - Blocco 4</h3>
-      <p class="muted">Percorso finale esercitazioni con correzione immediata.</p>
-      <a class="btn" href="{{ url_for('site.practice_start', block_id=4) }}">Avvia blocco 4</a>
-    </div>
-    <div class="card">
+  <div class="dash-grid">
+    {% for bid in [2, 3, 4] %}
+      {% set ph = pool_history[bid] %}
+      <div class="dash-card">
+        <h3>Esercitazione — Blocco {{ bid }}</h3>
+        <p class="muted">50 domande casuali dal pool con esito risposta immediato.</p>
+        {% if ph.last %}
+          <div class="pool-last">
+            <span>Ultimo: {{ ph.last.correct_count }}/{{ ph.last.total_questions }}</span>
+            {% if ph.last.percent >= 60 %}
+              <span class="pool-pct good">{{ ph.last.percent }}%</span>
+            {% elif ph.last.percent >= 40 %}
+              <span class="pool-pct mid">{{ ph.last.percent }}%</span>
+            {% else %}
+              <span class="pool-pct bad">{{ ph.last.percent }}%</span>
+            {% endif %}
+          </div>
+        {% endif %}
+        <div class="dash-actions">
+          <a class="btn" href="{{ url_for('site.practice_start', block_id=bid) }}">Avvia</a>
+          {% if ph.count > 0 %}
+            <a class="btn-outline" href="{{ url_for('site.pool_history', block_id=bid) }}">Storico ({{ ph.count }})</a>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+    <div class="dash-card">
       <h3>Esami</h3>
       <p class="muted">Accesso con password esame personale, timer attivo e nessun feedback immediato.</p>
-      <a class="btn" href="{{ url_for('site.exam_start') }}">Vai agli esami</a>
+      <div class="dash-actions" style="margin-top:auto;">
+        <a class="btn" href="{{ url_for('site.exam_start') }}">Vai agli esami</a>
+      </div>
     </div>
   </div>
 {% endblock %}

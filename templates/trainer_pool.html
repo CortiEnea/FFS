@@ -15,19 +15,282 @@
       border: 1px solid var(--line);
       box-shadow: none;
     }
-    .pool-page .btn,
-    .pool-page button {
+    .pool-page .dialog-actions button {
       background: linear-gradient(120deg, var(--brand-1), var(--brand-2));
       color: #fff;
       border: none;
       box-shadow: none;
     }
-    .pool-page .btn:hover,
-    .pool-page button:hover {
+    .pool-page .dialog-actions button:hover {
       background: linear-gradient(120deg, var(--brand-1), var(--brand-2));
       transform: none;
       box-shadow: none;
       filter: brightness(.96);
+    }
+    .pagination-wrap {
+      margin-top: 18px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .pagination-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      padding: 6px 10px;
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      box-shadow: 0 4px 18px rgba(17, 24, 39, 0.1);
+    }
+    .pagination-pill__arrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      color: var(--muted);
+      text-decoration: none;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .pagination-pill__arrow:hover:not(.is-disabled) {
+      background: rgba(235, 0, 0, 0.1);
+      color: var(--brand-1);
+    }
+    .pagination-pill__arrow.is-disabled {
+      opacity: 0.32;
+      cursor: default;
+      pointer-events: none;
+    }
+    .pagination-pill__arrow svg {
+      width: 22px;
+      height: 22px;
+      display: block;
+      fill: currentColor;
+    }
+    .pagination-pill__nums {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      padding: 0 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .pagination-pill__num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 40px;
+      height: 40px;
+      padding: 0 8px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      text-decoration: none;
+      transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .pagination-pill__num:hover:not(.is-current) {
+      color: var(--text);
+      background: rgba(17, 24, 39, 0.06);
+    }
+    .pagination-pill__num.is-current {
+      color: #fff;
+      background: linear-gradient(145deg, var(--brand-1), var(--brand-2));
+      box-shadow:
+        0 0 0 3px rgba(235, 0, 0, 0.18),
+        0 6px 16px rgba(235, 0, 0, 0.28);
+      cursor: default;
+    }
+    .pagination-pill__gap {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      height: 40px;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      user-select: none;
+    }
+    .pool-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 1px 2px rgba(17, 24, 39, 0.04);
+    }
+    .pool-toolbar-text h2 {
+      margin: 0 0 6px 0;
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .pool-toolbar-sub {
+      margin: 0;
+      max-width: min(52ch, 100%);
+      line-height: 1.45;
+      font-size: 14px;
+    }
+    .pool-toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    .pool-toolbar-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      line-height: 1.2;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+    }
+    .pool-toolbar-btn__icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .pool-toolbar-btn__icon svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+      fill: currentColor;
+    }
+    .pool-toolbar-btn--primary {
+      border: none;
+      color: #fff;
+      background: linear-gradient(120deg, var(--brand-1), var(--brand-2));
+      box-shadow: 0 2px 8px rgba(235, 0, 0, 0.22);
+    }
+    .pool-toolbar-btn--primary:hover {
+      filter: brightness(1.03);
+      box-shadow: 0 4px 14px rgba(235, 0, 0, 0.28);
+      transform: translateY(-1px);
+    }
+    .pool-toolbar-btn--secondary {
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+    .pool-toolbar-btn--secondary:hover {
+      background: #fff;
+      border-color: rgba(17, 24, 39, 0.18);
+      box-shadow: 0 2px 8px rgba(17, 24, 39, 0.06);
+    }
+    @media (max-width: 560px) {
+      .pool-toolbar-actions {
+        width: 100%;
+        justify-content: stretch;
+      }
+      .pool-toolbar-actions .pool-toolbar-btn {
+        flex: 1;
+        min-width: 0;
+        justify-content: center;
+      }
+    }
+    .pool-table .pool-actions-cell {
+      vertical-align: middle;
+      text-align: right;
+      width: 1%;
+      white-space: nowrap;
+      padding-left: 16px;
+    }
+    .pool-actions {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .pool-actions-delete-form {
+      display: inline-flex;
+      margin: 0;
+    }
+    .pool-page .pool-action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 0 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.2;
+      cursor: pointer;
+      transform: none;
+      box-shadow: 0 1px 2px rgba(17, 24, 39, 0.06);
+      transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .pool-page .pool-action-btn:hover {
+      transform: none;
+      box-shadow: 0 2px 8px rgba(17, 24, 39, 0.08);
+    }
+    .pool-action-btn__icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .pool-action-btn__icon svg {
+      width: 20px;
+      height: 20px;
+      display: block;
+      fill: currentColor;
+    }
+    .pool-page .pool-action-btn--edit {
+      background: #fff;
+      color: var(--brand-1);
+      border: 1px solid rgba(235, 0, 0, 0.4);
+    }
+    .pool-page .pool-action-btn--edit:hover {
+      background: rgba(235, 0, 0, 0.07);
+      border-color: rgba(235, 0, 0, 0.55);
+      filter: none;
+    }
+    .pool-page .pool-action-btn--del {
+      background: #fff;
+      color: #b91c1c;
+      border: 1px solid rgba(185, 28, 28, 0.45);
+    }
+    .pool-page .pool-action-btn--del:hover {
+      background: rgba(185, 28, 28, 0.09);
+      border-color: rgba(185, 28, 28, 0.6);
+      filter: none;
+    }
+    .pool-table .pool-actions-head {
+      text-align: right;
+    }
+    @media (max-width: 900px) {
+      .pool-table .pool-actions-cell {
+        white-space: normal;
+        text-align: left;
+        padding-top: 12px;
+      }
+      .pool-actions {
+        justify-content: flex-start;
+      }
     }
     .pool-page .table-wrap table th {
       color: var(--th-color);
@@ -37,134 +300,415 @@
       color: var(--text);
       border-bottom-color: var(--table-line);
     }
-    .pool-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
     .pool-table td, .pool-table th { vertical-align: top; }
     .pool-table .question-text { max-width: 620px; line-height: 1.35; }
-    .pool-header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
     .chip { display: inline-block; padding: 4px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 12px; background: rgba(17,24,39,.04); }
-    .pool-desc { margin: 8px 0 0 0; color: var(--muted); }
     .dialog-form .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .dialog-form .grid-1 { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
-    .dialog-actions { display: flex; gap: 8px; margin-top: 14px; }
+    .dialog-actions { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; }
+    .type-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .type-row input { display: none; }
+    .type-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+      cursor: pointer;
+      font-weight: 800;
+      color: var(--muted);
+      user-select: none;
+      transition: .15s ease;
+    }
+    .type-pill svg { width: 18px; height: 18px; fill: currentColor; opacity: .92; }
+    .type-row input:checked + label {
+      background: linear-gradient(120deg, var(--brand-1), var(--brand-2));
+      color: #fff;
+      border-color: transparent;
+      box-shadow: 0 10px 22px rgba(235, 0, 0, 0.18);
+    }
+    .criteria-box {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+      padding: 10px 12px;
+      font-size: 13px;
+      line-height: 1.35;
+      color: var(--muted);
+    }
+    .criteria-box strong { color: var(--text); }
+    .criteria-item { display: flex; gap: 10px; align-items: flex-start; }
+    .criteria-item + .criteria-item { margin-top: 8px; }
+    .criteria-icon { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
+    .criteria-icon svg { width: 18px; height: 18px; display: block; fill: currentColor; color: var(--th-color); }
+    .correct-multi { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+    .correct-multi label { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; }
+    .hidden { display: none !important; }
+    .th-sort {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: inherit;
+      text-decoration: none;
+    }
+    .th-sort:hover { text-decoration: underline; }
+    .th-sort .arrow { font-size: 11px; opacity: .55; }
+    .th-sort.active .arrow { opacity: 1; }
+    .image-upload-help { margin-top: 4px; }
+    .image-preview-inline {
+      margin-top: 10px;
+    }
+    .image-preview-inline p { margin: 0 0 8px 0; }
+    .image-preview-inline img {
+      max-width: 220px;
+      max-height: 140px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      object-fit: cover;
+      display: block;
+    }
+    .dialog-form .grid {
+      margin-top: 14px;
+    }
     dialog { width: min(760px, 96vw); border: 1px solid var(--line); border-radius: 12px; padding: 0; box-shadow: 0 10px 30px rgba(0,0,0,.18); background: var(--card-bg); color: var(--text); }
     dialog::backdrop { background: rgba(0, 0, 0, .35); }
     .dialog-body { padding: 16px; }
-    .dialog-head { border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 12px; }
+    .dialog-head { border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 12px; display:flex; align-items:center; justify-content: space-between; gap: 10px; }
+    .dialog-close-x {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    }
+    .dialog-close-x:hover { background: var(--surface-2); border-color: rgba(17, 24, 39, 0.18); color: var(--text); }
+    .dialog-close-x svg { width: 20px; height: 20px; display:block; fill: currentColor; }
     .correct-row { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; }
-    @media (max-width: 980px) { .pool-grid { grid-template-columns: 1fr; } }
+    .btn-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-icon .icon {
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .btn-icon .icon svg {
+      width: 16px;
+      height: 16px;
+      display: block;
+      fill: currentColor;
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .preview-heading {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0 0 8px 0;
+      color: var(--muted);
+    }
+    .preview-heading .icon-inline {
+      display: inline-flex;
+      color: var(--text);
+      opacity: 0.9;
+    }
+    .preview-heading .icon-inline svg {
+      width: 20px;
+      height: 20px;
+      display: block;
+      fill: currentColor;
+    }
+    .pool-page .dialog-actions button.btn-icon { min-height: 40px; padding: 8px 14px; }
   </style>
 
   <div class="pool-page">
-  <div class="page-head">
-    <div><h2>Pool domande</h2><p class="muted">Vista per blocchi, semplice e ordinata.</p></div>
-    <div class="pool-header-actions">
-      <button type="button" id="openCreate">Crea nuova</button>
-      {% if selected_block %}
-        <a class="btn" href="{{ url_for('trainer.pool') }}">Tutti i pool</a>
-      {% endif %}
-      <a class="btn" href="{{ url_for('trainer.dashboard') }}">Indietro</a>
+  <header class="pool-toolbar">
+    <div class="pool-toolbar-text">
+      <h2>Domande</h2>
+      <p class="muted pool-toolbar-sub">Gestione unica domande. I pool per i partecipanti vengono gestiti automaticamente dal sistema.</p>
     </div>
-  </div>
+    <div class="pool-toolbar-actions">
+      <button type="button" id="openCreate" class="pool-toolbar-btn pool-toolbar-btn--primary" title="Aggiungi una nuova domanda">
+        <span class="pool-toolbar-btn__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M11 5a1 1 0 1 1 2 0v6h6a1 1 0 1 1 0 2h-6v6a1 1 0 1 1-2 0v-6H5a1 1 0 1 1 0-2h6V5Z"/></svg></span>
+        <span>Nuova</span>
+      </button>
+      <a class="pool-toolbar-btn pool-toolbar-btn--secondary" href="{{ url_for('trainer.dashboard') }}" title="Torna al pannello formatore">
+        <span class="pool-toolbar-btn__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10.7 4.3a1 1 0 0 1 0 1.4L5.4 11H20a1 1 0 1 1 0 2H5.4l5.3 5.3a1 1 0 1 1-1.4 1.4l-7-7a1 1 0 0 1 0-1.4l7-7a1 1 0 0 1 1.4 0Z"/></svg></span>
+        <span>Indietro</span>
+      </a>
+    </div>
+  </header>
 
-  {% if not selected_block %}
-    <div class="pool-grid">
-      {% for b in [2, 3, 4] %}
-        <div class="card">
-          <div class="card-head">
-            <h3>Pool blocco {{ b }}</h3>
-            <span class="chip">{{ pool_counts[b] }} domande</span>
-          </div>
-          <p class="pool-desc">Contenuto disponibile per il blocco {{ b }}. Apri il pool per modificare o inserire domande.</p>
-          <div class="page-actions" style="margin-top:10px;">
-            <a class="btn" href="{{ url_for('trainer.pool', block=b) }}">Apri pool {{ b }}</a>
-          </div>
-        </div>
-      {% endfor %}
+  <div class="card">
+    <div class="card-head">
+      <h3>Elenco domande</h3>
+      <span class="chip">Pagina {{ page }} di {{ total_pages }} - {{ total_questions }} totali</span>
     </div>
-  {% else %}
-    <div class="card">
-      <div class="card-head">
-        <h3>Pool blocco {{ selected_block }}</h3>
-        <span class="chip">Mostrate {{ questions|length }} / {{ pool_counts[selected_block] }}</span>
-      </div>
-      {% if hidden_count > 0 %}
-        <p class="muted">Per leggibilità mostro solo le prime {{ show_limit }} domande.</p>
-      {% endif %}
-      <div class="table-wrap">
-        <table class="pool-table">
-          <thead>
+    <div class="table-wrap">
+      <table class="pool-table">
+        <thead>
+          <tr>
+            <th style="width:88px;">
+              <a
+                class="th-sort {% if sort_by == 'question_number' %}active{% endif %}"
+                href="{{ url_for('trainer.pool', page=1, sort_by='question_number', sort_dir='desc' if sort_by == 'question_number' and sort_dir == 'asc' else 'asc') }}"
+              >
+                <span>N.</span>
+                <span class="arrow">
+                  {% if sort_by == "question_number" %}
+                    {{ "▲" if sort_dir == "asc" else "▼" }}
+                  {% else %}
+                    ↕
+                  {% endif %}
+                </span>
+              </a>
+            </th>
+            <th>
+              <a
+                class="th-sort {% if sort_by == 'question_text' %}active{% endif %}"
+                href="{{ url_for('trainer.pool', page=1, sort_by='question_text', sort_dir='desc' if sort_by == 'question_text' and sort_dir == 'asc' else 'asc') }}"
+              >
+                <span>Domanda</span>
+                <span class="arrow">
+                  {% if sort_by == "question_text" %}
+                    {{ "▲" if sort_dir == "asc" else "▼" }}
+                  {% else %}
+                    ↕
+                  {% endif %}
+                </span>
+              </a>
+            </th>
+            <th style="width:90px;">
+              <a
+                class="th-sort {% if sort_by == 'correct_option' %}active{% endif %}"
+                href="{{ url_for('trainer.pool', page=1, sort_by='correct_option', sort_dir='desc' if sort_by == 'correct_option' and sort_dir == 'asc' else 'asc') }}"
+              >
+                <span>Corretta</span>
+                <span class="arrow">
+                  {% if sort_by == "correct_option" %}
+                    {{ "▲" if sort_dir == "asc" else "▼" }}
+                  {% else %}
+                    ↕
+                  {% endif %}
+                </span>
+              </a>
+            </th>
+            <th class="pool-actions-head" style="min-width: 260px; text-align: right;">Azione</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for q in questions %}
             <tr>
-              <th style="width:70px;">ID</th>
-              <th>Domanda</th>
-              <th style="width:90px;">Corretta</th>
-              <th style="width:120px;">Azione</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for q in questions %}
-              <tr>
-                <td>#{{ q.id }}</td>
-                <td class="question-text">{{ q.question_text }}</td>
-                <td>{{ ["A", "B", "C", "D"][q.correct_option] }}</td>
+              <td><strong>{{ q.question_number }}</strong></td>
+              <td class="question-text">{{ q.question_text }}</td>
+              {% set kind = (q.question_kind or 'single') %}
+              {% if kind == 'number' %}
+                <td>{{ q.correct_number or "—" }}</td>
+              {% elif kind in ('multi_one', 'multi_many') %}
+                {% set corr = (q.correct_options or [q.correct_option]) %}
                 <td>
-                  <button
-                    type="button"
-                    class="edit-btn"
-                    data-id="{{ q.id }}"
-                    data-block="{{ q.block_id }}"
-                    data-question="{{ q.question_text|e }}"
-                    data-opt0="{{ q.options[0]|e }}"
-                    data-opt1="{{ q.options[1]|e }}"
-                    data-opt2="{{ q.options[2]|e }}"
-                    data-opt3="{{ q.options[3]|e }}"
-                    data-correct="{{ q.correct_option }}"
-                  >
-                    Modifica
-                  </button>
+                  {%- set out = [] -%}
+                  {%- for i in corr -%}
+                    {%- if i in (0,1,2,3) -%}
+                      {%- set _ = out.append(["A","B","C","D"][i]) -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                  {{ out|join(", ") }}
                 </td>
-              </tr>
-            {% else %}
-              <tr><td colspan="4">Nessuna domanda presente.</td></tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+              {% else %}
+                <td>{{ ["A", "B", "C", "D"][q.correct_option] }}</td>
+              {% endif %}
+              <td class="pool-actions-cell">
+                <div class="pool-actions">
+                <button
+                  type="button"
+                  class="edit-btn pool-action-btn pool-action-btn--edit"
+                  title="Modifica domanda"
+                  data-id="{{ q.id }}"
+                  data-qnum="{{ q.question_number }}"
+                  data-block="{{ q.block_id }}"
+                  data-question="{{ q.question_text|e }}"
+                  data-image="{{ (q.image_url or '')|e }}"
+                  data-kind="{{ (q.question_kind or 'single')|e }}"
+                  data-correct-number="{{ (q.correct_number or '')|e }}"
+                  data-correct-options="{{ (q.correct_options or [q.correct_option])|join(',') }}"
+                  data-opt0="{{ q.options[0]|e }}"
+                  data-opt1="{{ q.options[1]|e }}"
+                  data-opt2="{{ q.options[2]|e }}"
+                  data-opt3="{{ q.options[3]|e }}"
+                  data-correct="{{ q.correct_option }}"
+                >
+                  <span class="pool-action-btn__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m14.69 3.86 5.45 5.45a1.2 1.2 0 0 1 0 1.69l-9.8 9.8a2 2 0 0 1-1.02.54l-4.13.9a1 1 0 0 1-1.2-1.2l.9-4.13a2 2 0 0 1 .54-1.02l9.8-9.8a1.2 1.2 0 0 1 1.69 0Zm-8.1 13.4-.5 2.3 2.3-.5 8.89-8.9-1.8-1.8-8.89 8.9Z"/></svg></span>
+                  <span class="pool-action-btn__label">Modifica</span>
+                </button>
+                <form class="pool-actions-delete-form" method="post" onsubmit="return confirm('Eliminare la domanda numero {{ q.question_number }}?');">
+                  <input type="hidden" name="action" value="delete_question" />
+                  <input type="hidden" name="question_id" value="{{ q.id }}" />
+                  <input type="hidden" name="page" value="{{ page }}" />
+                  <input type="hidden" name="sort_by" value="{{ sort_by }}" />
+                  <input type="hidden" name="sort_dir" value="{{ sort_dir }}" />
+                  <button type="submit" class="pool-action-btn pool-action-btn--del" title="Elimina domanda">
+                    <span class="pool-action-btn__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 3a1 1 0 0 0-1 1v1H4a1 1 0 1 0 0 2h1v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7h1a1 1 0 1 0 0-2h-4V4a1 1 0 0 0-1-1H9Zm1 2h4v1h-4V5Zm-1 5a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1Zm6 1a1 1 0 1 0-2 0v6a1 1 0 1 0 2 0v-6Z"/></svg></span>
+                    <span class="pool-action-btn__label">Elimina</span>
+                  </button>
+                </form>
+                </div>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td colspan="4">Nessuna domanda presente.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-  {% endif %}
+    {% if total_pages > 1 %}
+      <div class="pagination-wrap">
+        <nav class="pagination-pill" aria-label="Navigazione pagine">
+          {% if page > 1 %}
+            <a class="pagination-pill__arrow" href="{{ url_for('trainer.pool', page=page-1, sort_by=sort_by, sort_dir=sort_dir) }}" title="Pagina precedente">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12l4.58-4.59Z"/></svg>
+            </a>
+          {% else %}
+            <span class="pagination-pill__arrow is-disabled" title="Prima pagina">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12l4.58-4.59Z"/></svg>
+            </span>
+          {% endif %}
+          <div class="pagination-pill__nums">
+            {% for entry in pagination_entries %}
+              {% if entry == "ellipsis" %}
+                <span class="pagination-pill__gap" aria-hidden="true">…</span>
+              {% elif entry == page %}
+                <span class="pagination-pill__num is-current" aria-current="page">{{ entry }}</span>
+              {% else %}
+                <a class="pagination-pill__num" href="{{ url_for('trainer.pool', page=entry, sort_by=sort_by, sort_dir=sort_dir) }}">{{ entry }}</a>
+              {% endif %}
+            {% endfor %}
+          </div>
+          {% if page < total_pages %}
+            <a class="pagination-pill__arrow" href="{{ url_for('trainer.pool', page=page+1, sort_by=sort_by, sort_dir=sort_dir) }}" title="Pagina successiva">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41Z"/></svg>
+            </a>
+          {% else %}
+            <span class="pagination-pill__arrow is-disabled" title="Ultima pagina">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41Z"/></svg>
+            </span>
+          {% endif %}
+        </nav>
+      </div>
+    {% endif %}
+  </div>
 
   <dialog id="createDialog">
     <div class="dialog-body">
       <div class="dialog-head">
         <h3 style="margin:0;">Crea nuova domanda</h3>
+        <button type="button" class="close-dialog dialog-close-x" title="Chiudi" aria-label="Chiudi">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12l5.59-5.59Z"/></svg>
+        </button>
       </div>
-      <form method="post" class="dialog-form">
+      <form method="post" enctype="multipart/form-data" class="dialog-form">
         <input type="hidden" name="action" value="create_question" />
-        <div class="grid">
-          <select name="block_id" required>
-            <option value="2" {% if selected_block == 2 %}selected{% endif %}>Blocco 2</option>
-            <option value="3" {% if selected_block == 3 %}selected{% endif %}>Blocco 3</option>
-            <option value="4" {% if selected_block == 4 %}selected{% endif %}>Blocco 4</option>
-          </select>
+        <input type="hidden" name="block_id" value="auto" />
+        <input type="hidden" name="page" value="{{ page }}" />
+        <input type="hidden" name="sort_by" value="{{ sort_by }}" />
+        <input type="hidden" name="sort_dir" value="{{ sort_dir }}" />
+        <p style="margin: 0 0 6px;"><strong>Tipo domanda</strong></p>
+        <div class="type-row" id="createTypeRow">
+          <input id="ct-number" type="radio" name="question_kind" value="number" />
+          <label class="type-pill" for="ct-number" title="Risposta numerica">
+            <span style="font-weight:900;font-size:13px;font-style:italic;letter-spacing:.02em;line-height:1;">123</span>
+            Numero
+          </label>
+          <input id="ct-single" type="radio" name="question_kind" value="single" checked />
+          <label class="type-pill" for="ct-single" title="Una sola risposta corretta">
+            <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z"/></svg>
+            Singola
+          </label>
+          <input id="ct-mm" type="radio" name="question_kind" value="multi_many" />
+          <label class="type-pill" for="ct-mm" title="Una o più risposte corrette">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm-8 14-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8Z"/></svg>
+            Multipla
+          </label>
         </div>
         <div class="grid-1">
           <textarea name="question_text" placeholder="Testo domanda" required></textarea>
+          <input type="file" id="createImageFileInput" name="image_file" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" />
+          <small class="muted image-upload-help">
+            Immagine domanda (opzionale). Formati supportati: PNG, JPG, JPEG, GIF, WEBP.
+          </small>
+          <div class="image-preview-inline">
+            <div class="preview-heading" id="createPreviewTitle" style="display:none;" role="status" aria-live="polite">
+              <span class="icon-inline" id="createPreviewIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4.86 8.86-3 3.01L9 14.14l-4 5h16l-5.86-7.14z"/></svg></span>
+              <span class="sr-only" id="createPreviewSrOnly">Anteprima immagine</span>
+            </div>
+            <img id="createImagePreview" src="" alt="Anteprima" style="display:none;" />
+          </div>
         </div>
-        <div class="grid">
-          <input name="opt0" placeholder="Opzione A" required />
-          <input name="opt1" placeholder="Opzione B" required />
-          <input name="opt2" placeholder="Opzione C" required />
-          <input name="opt3" placeholder="Opzione D" required />
+        <div id="createNumberWrap" class="hidden" style="margin-top: 10px;">
+          <input
+            name="correct_number"
+            type="number"
+            inputmode="numeric"
+            step="1"
+            min="0"
+            pattern="[0-9]*"
+            oninput="this.value=this.value.replace(/\\D+/g,'')"
+            placeholder="0"
+          />
         </div>
-        <p style="margin:10px 0 6px;"><strong>Risposta corretta</strong></p>
-        <div class="correct-row">
-          <label><input type="radio" name="correct_option" value="0" checked required /> A</label>
-          <label><input type="radio" name="correct_option" value="1" /> B</label>
-          <label><input type="radio" name="correct_option" value="2" /> C</label>
-          <label><input type="radio" name="correct_option" value="3" /> D</label>
+        <div id="createOptionsWrap">
+          <div class="grid">
+            <input name="opt0" id="createOpt0" placeholder="Opzione A" required />
+            <input name="opt1" id="createOpt1" placeholder="Opzione B" required />
+            <input name="opt2" id="createOpt2" placeholder="Opzione C" required />
+            <input name="opt3" id="createOpt3" placeholder="Opzione D" required />
+          </div>
+          <div id="createCorrectSingle">
+            <p style="margin:10px 0 6px;"><strong>Risposta corretta</strong></p>
+            <div class="correct-row">
+              <label><input type="radio" name="correct_option" value="0" checked /> A</label>
+              <label><input type="radio" name="correct_option" value="1" /> B</label>
+              <label><input type="radio" name="correct_option" value="2" /> C</label>
+              <label><input type="radio" name="correct_option" value="3" /> D</label>
+            </div>
+          </div>
+          <div id="createCorrectMulti" class="hidden">
+            <p style="margin:10px 0 6px;"><strong>Risposte corrette</strong></p>
+            <div class="correct-multi">
+              <label><input type="checkbox" name="correct_options" value="0" /> A</label>
+              <label><input type="checkbox" name="correct_options" value="1" /> B</label>
+              <label><input type="checkbox" name="correct_options" value="2" /> C</label>
+              <label><input type="checkbox" name="correct_options" value="3" /> D</label>
+            </div>
+          </div>
         </div>
         <div class="dialog-actions">
-          <button type="submit">Salva</button>
-          <button type="button" class="close-dialog">Annulla</button>
+          <button type="submit" class="btn-icon" title="Salva domanda">
+            Salva
+          </button>
         </div>
       </form>
     </div>
@@ -174,36 +718,75 @@
     <div class="dialog-body">
       <div class="dialog-head">
         <h3 style="margin:0;">Modifica domanda <span id="editTitleId"></span></h3>
+        <button type="button" class="close-dialog dialog-close-x" title="Chiudi" aria-label="Chiudi">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12l5.59-5.59Z"/></svg>
+        </button>
       </div>
-      <form method="post" class="dialog-form">
+      <form method="post" enctype="multipart/form-data" class="dialog-form">
         <input type="hidden" name="action" value="update_question" />
+        <input type="hidden" name="page" value="{{ page }}" />
+        <input type="hidden" name="sort_by" value="{{ sort_by }}" />
+        <input type="hidden" name="sort_dir" value="{{ sort_dir }}" />
         <input type="hidden" name="question_id" id="editQuestionId" />
-        <div class="grid">
-          <select name="block_id" id="editBlockId" required>
-            <option value="2">Blocco 2</option>
-            <option value="3">Blocco 3</option>
-            <option value="4">Blocco 4</option>
-          </select>
-        </div>
+        <input type="hidden" name="block_id" id="editBlockId" />
+        <input type="hidden" name="existing_image_url" id="editExistingImageUrl" />
+        <input type="hidden" name="question_kind" id="editQuestionKind" value="single" />
+        <p class="muted" style="margin:0 0 8px 0;">Numero domanda: <strong id="editQuestionNumber">-</strong></p>
         <div class="grid-1">
           <textarea name="question_text" id="editQuestionText" placeholder="Testo domanda" required></textarea>
+          <input type="file" id="editImageFileInput" name="image_file" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" />
+          <small class="muted image-upload-help" id="editImageHint">Nessuna immagine caricata.</small>
+          <div class="image-preview-inline">
+            <div class="preview-heading" id="editPreviewTitle" role="status" aria-live="polite">
+              <span class="icon-inline" id="editPreviewIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4.86 8.86-3 3.01L9 14.14l-4 5h16l-5.86-7.14z"/></svg></span>
+              <span class="sr-only" id="editPreviewSrOnly">Anteprima immagine</span>
+            </div>
+            <img id="editImagePreview" src="" alt="Anteprima immagine domanda" style="display:none;" />
+          </div>
         </div>
-        <div class="grid">
-          <input name="opt0" id="editOpt0" placeholder="Opzione A" required />
-          <input name="opt1" id="editOpt1" placeholder="Opzione B" required />
-          <input name="opt2" id="editOpt2" placeholder="Opzione C" required />
-          <input name="opt3" id="editOpt3" placeholder="Opzione D" required />
+        <div id="editNumberWrap" class="hidden" style="margin-top: 10px;">
+          <input
+            name="correct_number"
+            id="editCorrectNumber"
+            type="number"
+            inputmode="numeric"
+            step="1"
+            min="0"
+            pattern="[0-9]*"
+            oninput="this.value=this.value.replace(/\\D+/g,'')"
+            placeholder="0"
+          />
         </div>
-        <p style="margin:10px 0 6px;"><strong>Risposta corretta</strong></p>
-        <div class="correct-row">
-          <label><input type="radio" name="correct_option" value="0" id="editCorrect0" required /> A</label>
-          <label><input type="radio" name="correct_option" value="1" id="editCorrect1" /> B</label>
-          <label><input type="radio" name="correct_option" value="2" id="editCorrect2" /> C</label>
-          <label><input type="radio" name="correct_option" value="3" id="editCorrect3" /> D</label>
+        <div id="editOptionsWrap">
+          <div class="grid">
+            <input name="opt0" id="editOpt0" placeholder="Opzione A" required />
+            <input name="opt1" id="editOpt1" placeholder="Opzione B" required />
+            <input name="opt2" id="editOpt2" placeholder="Opzione C" required />
+            <input name="opt3" id="editOpt3" placeholder="Opzione D" required />
+          </div>
+          <div id="editCorrectSingle">
+            <p style="margin:10px 0 6px;"><strong>Risposta corretta</strong></p>
+            <div class="correct-row">
+              <label><input type="radio" name="correct_option" value="0" id="editCorrect0" /> A</label>
+              <label><input type="radio" name="correct_option" value="1" id="editCorrect1" /> B</label>
+              <label><input type="radio" name="correct_option" value="2" id="editCorrect2" /> C</label>
+              <label><input type="radio" name="correct_option" value="3" id="editCorrect3" /> D</label>
+            </div>
+          </div>
+          <div id="editCorrectMulti" class="hidden">
+            <p style="margin:10px 0 6px;"><strong>Risposte corrette</strong></p>
+            <div class="correct-multi">
+              <label><input type="checkbox" name="correct_options" value="0" id="editCorrectM0" /> A</label>
+              <label><input type="checkbox" name="correct_options" value="1" id="editCorrectM1" /> B</label>
+              <label><input type="checkbox" name="correct_options" value="2" id="editCorrectM2" /> C</label>
+              <label><input type="checkbox" name="correct_options" value="3" id="editCorrectM3" /> D</label>
+            </div>
+          </div>
         </div>
         <div class="dialog-actions">
-          <button type="submit">Salva modifiche</button>
-          <button type="button" class="close-dialog">Annulla</button>
+          <button type="submit" class="btn-icon" title="Salva modifiche">
+            Salva
+          </button>
         </div>
       </form>
     </div>
@@ -212,7 +795,110 @@
   <script>
     const createDialog = document.getElementById("createDialog");
     const editDialog = document.getElementById("editDialog");
-    document.getElementById("openCreate").addEventListener("click", () => createDialog.showModal());
+    const createImageFileInput = document.getElementById("createImageFileInput");
+    const createImagePreview = document.getElementById("createImagePreview");
+    const createPreviewTitle = document.getElementById("createPreviewTitle");
+    const createPreviewIcon = document.getElementById("createPreviewIcon");
+    const createPreviewSrOnly = document.getElementById("createPreviewSrOnly");
+    let createPreviewObjectUrl = null;
+    const createNumberWrap = document.getElementById("createNumberWrap");
+    const createOptionsWrap = document.getElementById("createOptionsWrap");
+    const createCorrectSingle = document.getElementById("createCorrectSingle");
+    const createCorrectMulti = document.getElementById("createCorrectMulti");
+    const createOpt0 = document.getElementById("createOpt0");
+    const createOpt1 = document.getElementById("createOpt1");
+    const createOpt2 = document.getElementById("createOpt2");
+    const createOpt3 = document.getElementById("createOpt3");
+
+    const ICON_PREVIEW_IMG =
+      '<svg viewBox="0 0 24 24"><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4.86 8.86-3 3.01L9 14.14l-4 5h16l-5.86-7.14z"/></svg>';
+    const ICON_PREVIEW_UPLOAD =
+      '<svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/></svg>';
+
+    function setCreatePreviewLabel(isNewFile) {
+      if (!createPreviewIcon || !createPreviewSrOnly) return;
+      if (isNewFile) {
+        createPreviewIcon.innerHTML = ICON_PREVIEW_UPLOAD;
+        createPreviewSrOnly.textContent = "Anteprima nuovo file";
+      } else {
+        createPreviewIcon.innerHTML = ICON_PREVIEW_IMG;
+        createPreviewSrOnly.textContent = "Anteprima immagine";
+      }
+    }
+
+    function clearCreatePreviewObjectUrl() {
+      if (createPreviewObjectUrl) {
+        URL.revokeObjectURL(createPreviewObjectUrl);
+        createPreviewObjectUrl = null;
+      }
+    }
+
+    function setOptionsRequired(enabled) {
+      [createOpt0, createOpt1, createOpt2, createOpt3, editOpt0, editOpt1, editOpt2, editOpt3].forEach((el) => {
+        if (!el) return;
+        if (enabled) el.setAttribute("required", "required");
+        else el.removeAttribute("required");
+      });
+    }
+
+    function setCreateKind(kind) {
+      const isNumber = kind === "number";
+      const isMulti = kind === "multi_one" || kind === "multi_many";
+      if (createNumberWrap) createNumberWrap.classList.toggle("hidden", !isNumber);
+      if (createOptionsWrap) createOptionsWrap.classList.toggle("hidden", isNumber);
+      if (createCorrectSingle) createCorrectSingle.classList.toggle("hidden", isMulti || isNumber);
+      if (createCorrectMulti) createCorrectMulti.classList.toggle("hidden", !isMulti);
+      setOptionsRequired(!isNumber);
+    }
+
+    document.getElementById("openCreate").addEventListener("click", () => {
+      clearCreatePreviewObjectUrl();
+      if (createImageFileInput) createImageFileInput.value = "";
+      if (createImagePreview) {
+        createImagePreview.src = "";
+        createImagePreview.style.display = "none";
+      }
+      if (createPreviewTitle) createPreviewTitle.style.display = "none";
+      setCreatePreviewLabel(false);
+      const singleRadio = document.getElementById("ct-single");
+      if (singleRadio) singleRadio.checked = true;
+      setCreateKind("single");
+      createDialog.showModal();
+    });
+
+    document.querySelectorAll("#createTypeRow input[name='question_kind']").forEach((el) => {
+      el.addEventListener("change", () => setCreateKind(el.value));
+    });
+
+    if (createImageFileInput && createImagePreview) {
+      createImageFileInput.addEventListener("change", function () {
+        const f = this.files && this.files[0];
+        clearCreatePreviewObjectUrl();
+        if (f) {
+          createPreviewObjectUrl = URL.createObjectURL(f);
+          createImagePreview.src = createPreviewObjectUrl;
+          createImagePreview.style.display = "block";
+          if (createPreviewTitle) createPreviewTitle.style.display = "block";
+          setCreatePreviewLabel(true);
+        } else {
+          createImagePreview.src = "";
+          createImagePreview.style.display = "none";
+          if (createPreviewTitle) createPreviewTitle.style.display = "none";
+          setCreatePreviewLabel(false);
+        }
+      });
+    }
+    createDialog.addEventListener("close", () => {
+      clearCreatePreviewObjectUrl();
+      if (createImageFileInput) createImageFileInput.value = "";
+      if (createImagePreview) {
+        createImagePreview.src = "";
+        createImagePreview.style.display = "none";
+      }
+      if (createPreviewTitle) createPreviewTitle.style.display = "none";
+      setCreatePreviewLabel(false);
+    });
+
     document.querySelectorAll(".close-dialog").forEach((el) => {
       el.addEventListener("click", () => {
         if (createDialog.open) createDialog.close();
@@ -221,27 +907,129 @@
     });
 
     const editTitleId = document.getElementById("editTitleId");
+    const editQuestionNumber = document.getElementById("editQuestionNumber");
     const editQuestionId = document.getElementById("editQuestionId");
     const editBlockId = document.getElementById("editBlockId");
     const editQuestionText = document.getElementById("editQuestionText");
+    const editExistingImageUrl = document.getElementById("editExistingImageUrl");
+    const editImageHint = document.getElementById("editImageHint");
+    const editImagePreview = document.getElementById("editImagePreview");
+    const editImageFileInput = document.getElementById("editImageFileInput");
+    const editPreviewIcon = document.getElementById("editPreviewIcon");
+    const editPreviewSrOnly = document.getElementById("editPreviewSrOnly");
+    let editPreviewObjectUrl = null;
+
+    function setEditPreviewLabel(mode) {
+      if (!editPreviewIcon || !editPreviewSrOnly) return;
+      if (mode === "new") {
+        editPreviewIcon.innerHTML = ICON_PREVIEW_UPLOAD;
+        editPreviewSrOnly.textContent = "Anteprima nuovo file";
+      } else {
+        editPreviewIcon.innerHTML = ICON_PREVIEW_IMG;
+        editPreviewSrOnly.textContent = "Anteprima immagine";
+      }
+    }
+
+    function clearEditPreviewObjectUrl() {
+      if (editPreviewObjectUrl) {
+        URL.revokeObjectURL(editPreviewObjectUrl);
+        editPreviewObjectUrl = null;
+      }
+    }
+
+    if (editImageFileInput) {
+      editImageFileInput.addEventListener("change", function () {
+        const f = this.files && this.files[0];
+        clearEditPreviewObjectUrl();
+        if (f) {
+          editPreviewObjectUrl = URL.createObjectURL(f);
+          editImagePreview.src = editPreviewObjectUrl;
+          editImagePreview.style.display = "block";
+          setEditPreviewLabel("new");
+          editImageHint.textContent = "Anteprima aggiornata. Salva per confermare sul server.";
+        } else {
+          const existing = (editExistingImageUrl && editExistingImageUrl.value) || "";
+          if (existing) {
+            editImagePreview.src = existing;
+            editImagePreview.style.display = "block";
+          } else {
+            editImagePreview.src = "";
+            editImagePreview.style.display = "none";
+          }
+          setEditPreviewLabel("default");
+          editImageHint.textContent = existing
+            ? "Immagine attuale presente. Per cambiarla, carica un nuovo file."
+            : "Nessuna immagine presente per questa domanda.";
+        }
+      });
+    }
     const editOpt0 = document.getElementById("editOpt0");
     const editOpt1 = document.getElementById("editOpt1");
     const editOpt2 = document.getElementById("editOpt2");
     const editOpt3 = document.getElementById("editOpt3");
+    const editQuestionKind = document.getElementById("editQuestionKind");
+    const editNumberWrap = document.getElementById("editNumberWrap");
+    const editCorrectNumber = document.getElementById("editCorrectNumber");
+    const editOptionsWrap = document.getElementById("editOptionsWrap");
+    const editCorrectSingle = document.getElementById("editCorrectSingle");
+    const editCorrectMulti = document.getElementById("editCorrectMulti");
+    const editCorrectM0 = document.getElementById("editCorrectM0");
+    const editCorrectM1 = document.getElementById("editCorrectM1");
+    const editCorrectM2 = document.getElementById("editCorrectM2");
+    const editCorrectM3 = document.getElementById("editCorrectM3");
+
+    function setEditKind(kind) {
+      const isNumber = kind === "number";
+      const isMulti = kind === "multi_one" || kind === "multi_many";
+      if (editNumberWrap) editNumberWrap.classList.toggle("hidden", !isNumber);
+      if (editOptionsWrap) editOptionsWrap.classList.toggle("hidden", isNumber);
+      if (editCorrectSingle) editCorrectSingle.classList.toggle("hidden", isMulti || isNumber);
+      if (editCorrectMulti) editCorrectMulti.classList.toggle("hidden", !isMulti);
+      if (editQuestionKind) editQuestionKind.value = kind;
+      setOptionsRequired(!isNumber);
+    }
 
     document.querySelectorAll(".edit-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
+        clearEditPreviewObjectUrl();
+        if (editImageFileInput) editImageFileInput.value = "";
         editQuestionId.value = btn.dataset.id;
-        editTitleId.textContent = `#${btn.dataset.id}`;
+        editTitleId.textContent = `n. ${btn.dataset.qnum || "?"}`;
+        if (editQuestionNumber) editQuestionNumber.textContent = btn.dataset.qnum || "-";
         editBlockId.value = btn.dataset.block;
         editQuestionText.value = btn.dataset.question;
+        editExistingImageUrl.value = btn.dataset.image || "";
+        editImageHint.textContent = btn.dataset.image
+          ? "Immagine attuale presente. Per cambiarla, carica un nuovo file."
+          : "Nessuna immagine presente per questa domanda.";
+        setEditPreviewLabel("default");
+        if (btn.dataset.image) {
+          editImagePreview.src = btn.dataset.image;
+          editImagePreview.style.display = "block";
+        } else {
+          editImagePreview.src = "";
+          editImagePreview.style.display = "none";
+        }
         editOpt0.value = btn.dataset.opt0;
         editOpt1.value = btn.dataset.opt1;
         editOpt2.value = btn.dataset.opt2;
         editOpt3.value = btn.dataset.opt3;
-        const correct = btn.dataset.correct;
-        const radio = document.getElementById(`editCorrect${correct}`);
-        if (radio) radio.checked = true;
+        const kind = (btn.dataset.kind || "single").toLowerCase();
+        setEditKind(kind);
+        if (kind === "number") {
+          if (editCorrectNumber) editCorrectNumber.value = btn.dataset.correctNumber || "";
+        } else if (kind === "single") {
+          const correct = btn.dataset.correct;
+          const radio = document.getElementById(`editCorrect${correct}`);
+          if (radio) radio.checked = true;
+        } else {
+          const corr = (btn.dataset.correctOptions || "").split(",").filter((x) => x !== "");
+          const set = new Set(corr);
+          if (editCorrectM0) editCorrectM0.checked = set.has("0");
+          if (editCorrectM1) editCorrectM1.checked = set.has("1");
+          if (editCorrectM2) editCorrectM2.checked = set.has("2");
+          if (editCorrectM3) editCorrectM3.checked = set.has("3");
+        }
         editDialog.showModal();
       });
     });

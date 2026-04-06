@@ -10,7 +10,7 @@
     .status-value.warn { color: #f8b76a; }
     .status-value.ok { color: var(--ok); }
     .actions-bar { display: flex; gap: 8px; flex-wrap: wrap; }
-    .actions-inline { display: flex; gap: 6px; flex-wrap: wrap; }
+    .actions-inline { display: inline-flex; gap: 6px; align-items: center; }
     .btn-icon { display: inline-flex; align-items: center; gap: 6px; }
     .icon { width: 14px; height: 14px; display: inline-block; vertical-align: middle; }
     .icon svg { width: 14px; height: 14px; display: block; fill: currentColor; }
@@ -20,6 +20,32 @@
     .exam-table td, .exam-table th { vertical-align: top; }
     .exam-table .question-text { line-height: 1.4; min-width: 360px; }
     .row-actions { white-space: nowrap; }
+    .move-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+      cursor: pointer;
+      color: var(--muted);
+      padding: 0;
+      transition: background .12s, color .12s;
+    }
+    .move-btn:hover { background: var(--surface-2); color: var(--text); }
+    .move-btn:disabled { opacity: .3; cursor: default; pointer-events: none; }
+    .move-btn svg { width: 16px; height: 16px; fill: currentColor; display: block; }
+    .move-group { display: inline-flex; gap: 3px; margin-right: 6px; }
+    .exam-table tbody tr { transition: transform .25s ease, opacity .2s ease; }
+    .row-fly-up { transform: translateY(-100%); }
+    .row-fly-down { transform: translateY(100%); }
+    .row-flash { animation: rowFlash .35s ease; }
+    @keyframes rowFlash {
+      0% { background: rgba(99,102,241,.08); }
+      100% { background: transparent; }
+    }
     .checkbox-wrap { display: inline-flex; align-items: center; gap: 6px; }
     .hint { font-size: 13px; color: var(--muted); margin: 0 0 10px 0; }
     .steps { margin: 0; padding-left: 18px; color: var(--muted); }
@@ -31,7 +57,65 @@
     .dialog-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .dialog-grid-1 { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
     .correct-row { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; }
-    .dialog-actions { display: flex; gap: 8px; margin-top: 14px; }
+    .correct-multi { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+    .correct-multi label { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; }
+    .dialog-actions { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; }
+    .hidden { display: none !important; }
+    .type-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .type-row input { display: none; }
+    .type-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background .15s ease, border-color .15s ease, color .15s ease;
+      color: var(--muted);
+      background: var(--card-bg);
+    }
+    .type-pill:hover { background: var(--surface-2); }
+    .type-row input:checked + .type-pill {
+      background: linear-gradient(120deg, var(--brand-1), var(--brand-2));
+      color: #fff;
+      border-color: transparent;
+    }
+    .type-pill svg { width: 16px; height: 16px; display: block; fill: currentColor; }
+    .dialog-head { border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .dialog-close-x {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .dialog-close-x:hover { background: var(--surface-2); color: var(--text); }
+    .dialog-close-x svg { width: 20px; height: 20px; display: block; fill: currentColor; }
+    .image-upload-help { margin-top: 4px; }
+    .image-preview-inline {
+      margin-top: 10px;
+    }
+    .image-preview-inline p { margin: 0 0 8px 0; }
+    .image-preview-inline img {
+      max-width: 220px;
+      max-height: 140px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      object-fit: cover;
+      display: block;
+    }
+    .dialog-grid {
+      margin-top: 14px;
+    }
     @media (max-width: 1000px) {
       .status-grid { grid-template-columns: 1fr; }
     }
@@ -64,9 +148,20 @@
   <div class="status-grid">
     <div class="status-box">
       <p class="status-label">Sessione attiva</p>
-      <p class="status-value {% if active_session %}ok{% else %}warn{% endif %}">
-        {{ active_session.title if active_session else "Nessuna sessione attiva" }}
-      </p>
+      {% if active_session %}
+        <p class="status-value ok" style="margin-bottom:8px;">{{ active_session.title }}</p>
+        <form method="post" style="display:grid; grid-template-columns:1fr auto auto; gap:8px; align-items:end;">
+          <input type="hidden" name="action" value="update_session" />
+          <input name="title" value="{{ active_session.title }}" placeholder="Titolo" required style="min-width:0;" />
+          <div>
+            <label class="muted" style="display:block; font-size:12px; margin-bottom:4px;">Durata (in minuti)</label>
+            <input name="duration_minutes" type="number" min="1" value="{{ active_session.duration_minutes }}" style="width:80px;" required />
+          </div>
+          <button type="submit" style="white-space:nowrap;">Salva</button>
+        </form>
+      {% else %}
+        <p class="status-value warn">Nessuna sessione attiva</p>
+      {% endif %}
     </div>
     <div class="status-box">
       <p class="status-label">Completamento domande</p>
@@ -100,7 +195,7 @@
                 <td>#{{ s.id }}</td>
                 <td>{{ s.title }}</td>
                 <td>{{ s.duration_minutes }} min</td>
-                <td>{{ s.created_at or "-" }}</td>
+                <td>{{ s.created_at|swiss_date }}</td>
                 <td>{% if s.is_active %}<span class="ok">Attivo</span>{% else %}<span class="muted">Archivio</span>{% endif %}</td>
                 <td>
                   {% if not s.is_active %}
@@ -201,39 +296,63 @@
       <table class="exam-table">
         <thead>
           <tr>
-            <th style="width:80px;">Pos.</th>
+            <th style="width:60px;">N.</th>
             <th>Domanda</th>
-            <th style="width:90px;">Punti</th>
             <th style="width:90px;">Corretta</th>
             <th style="width:210px;">Azione</th>
           </tr>
         </thead>
         <tbody>
           {% for q in questions %}
-            <tr>
+            <tr id="q-{{ q.id }}">
               <td><strong>{{ q.position }}</strong></td>
               <td class="question-text">{{ q.question_text }}</td>
-              <td>{{ q.points }}</td>
-              <td>{{ ["A", "B", "C", "D"][q.correct_option] }}</td>
+              {% set kind = (q.question_kind or 'single') %}
+              {% if kind == 'number' %}
+                <td>{{ q.correct_number or "—" }}</td>
+              {% elif kind == 'multi_many' %}
+                {% set corr = (q.correct_options or [q.correct_option]) %}
+                <td>
+                  {%- set out = [] -%}
+                  {%- for i in corr -%}
+                    {%- if i in (0,1,2,3) -%}
+                      {%- set _ = out.append(["A","B","C","D"][i]) -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                  {{ out|join(", ") }}
+                </td>
+              {% else %}
+                <td>{{ ["A", "B", "C", "D"][q.correct_option] }}</td>
+              {% endif %}
               <td class="row-actions">
                 <div class="actions-inline">
+                  <div class="move-group">
+                    <button type="button" class="move-btn move-up" data-id="{{ q.id }}" title="Sposta su" {% if loop.first %}disabled{% endif %}>
+                      <svg viewBox="0 0 24 24"><path d="M12 4l-8 8h5v8h6v-8h5z"/></svg>
+                    </button>
+                    <button type="button" class="move-btn move-down" data-id="{{ q.id }}" title="Sposta giù" {% if loop.last %}disabled{% endif %}>
+                      <svg viewBox="0 0 24 24"><path d="M12 20l8-8h-5V4H9v8H4z"/></svg>
+                    </button>
+                  </div>
                   <button
                     type="button"
                     class="edit-question-btn btn-icon"
                     data-id="{{ q.id }}"
-                    data-position="{{ q.position }}"
-                    data-points="{{ q.points }}"
                     data-question="{{ q.question_text|e }}"
-                    data-opt0="{{ q.options[0]|e }}"
-                    data-opt1="{{ q.options[1]|e }}"
-                    data-opt2="{{ q.options[2]|e }}"
-                    data-opt3="{{ q.options[3]|e }}"
+                    data-image="{{ (q.image_url or '')|e }}"
+                    data-kind="{{ (q.question_kind or 'single')|e }}"
+                    data-correct-number="{{ (q.correct_number or '')|e }}"
+                    data-correct-options="{{ (q.correct_options or [q.correct_option])|join(',') }}"
+                    data-opt0="{{ q.options[0]|e if q.options|length > 0 else '' }}"
+                    data-opt1="{{ q.options[1]|e if q.options|length > 1 else '' }}"
+                    data-opt2="{{ q.options[2]|e if q.options|length > 2 else '' }}"
+                    data-opt3="{{ q.options[3]|e if q.options|length > 3 else '' }}"
                     data-correct="{{ q.correct_option }}"
                   >
                     <span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.69 3.86 5.45 5.45a1.2 1.2 0 0 1 0 1.69l-9.8 9.8a2 2 0 0 1-1.02.54l-4.13.9a1 1 0 0 1-1.2-1.2l.9-4.13a2 2 0 0 1 .54-1.02l9.8-9.8a1.2 1.2 0 0 1 1.69 0Zm-8.1 13.4-.5 2.3 2.3-.5 8.89-8.9-1.8-1.8-8.89 8.9Z"/></svg></span>
                     <span>Modifica</span>
                   </button>
-                  <form method="post" onsubmit="return confirm('Confermi eliminazione domanda?');">
+                  <form method="post" style="margin:0;" onsubmit="return confirm('Confermi eliminazione domanda?');">
                     <input type="hidden" name="action" value="delete_question" />
                     <input type="hidden" name="question_id" value="{{ q.id }}" />
                     <button type="submit" class="btn-icon">
@@ -245,7 +364,7 @@
               </td>
             </tr>
           {% else %}
-            <tr><td colspan="5">Nessuna domanda inserita.</td></tr>
+            <tr><td colspan="4">Nessuna domanda inserita.</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -271,32 +390,68 @@
 
   <dialog id="addQuestionDialog">
     <div class="dialog-body">
-      <div class="dialog-head"><h3 class="btn-icon" style="margin:0;"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h11a2 2 0 0 1 2 2v2h2a1 1 0 0 1 1 1v11a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm9 11H9v4a1 1 0 1 1-2 0v-4H3a1 1 0 1 1 0-2h4V8a1 1 0 1 1 2 0v4h4a1 1 0 1 1 0 2Z"/></svg></span><span>Nuova domanda esame</span></h3></div>
-      <form method="post">
+      <div class="dialog-head">
+        <h3 style="margin:0;">Nuova domanda esame</h3>
+        <button type="button" class="close-dialog dialog-close-x" title="Chiudi" aria-label="Chiudi">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12l5.59-5.59Z"/></svg>
+        </button>
+      </div>
+      <form method="post" enctype="multipart/form-data">
         <input type="hidden" name="action" value="add_question" />
-        <div class="dialog-grid">
-          <input name="position" type="number" min="1" placeholder="Posizione" required />
-          <input name="points" type="number" min="1" value="1" required />
+        <p style="margin: 0 0 6px;"><strong>Tipo domanda</strong></p>
+        <div class="type-row" id="addTypeRow">
+          <input id="at-number" type="radio" name="question_kind" value="number" />
+          <label class="type-pill" for="at-number" title="Risposta numerica">
+            <span style="font-weight:900;font-size:13px;font-style:italic;letter-spacing:.02em;line-height:1;">123</span>
+            Numero
+          </label>
+          <input id="at-single" type="radio" name="question_kind" value="single" checked />
+          <label class="type-pill" for="at-single" title="Una sola risposta corretta">
+            <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2Zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z"/></svg>
+            Singola
+          </label>
+          <input id="at-mm" type="radio" name="question_kind" value="multi_many" />
+          <label class="type-pill" for="at-mm" title="Una o più risposte corrette">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm-8 14-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8Z"/></svg>
+            Multipla
+          </label>
         </div>
-        <div class="dialog-grid-1">
+        <div class="dialog-grid-1" style="margin-top:10px;">
           <textarea name="question_text" placeholder="Testo domanda" required></textarea>
+          <input type="file" name="image_file" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" />
+          <small class="muted image-upload-help">Immagine domanda (opzionale).</small>
         </div>
-        <div class="dialog-grid">
-          <input name="opt0" placeholder="Opzione A" required />
-          <input name="opt1" placeholder="Opzione B" required />
-          <input name="opt2" placeholder="Opzione C" required />
-          <input name="opt3" placeholder="Opzione D" required />
+        <div id="addNumberWrap" class="hidden" style="margin-top: 10px;">
+          <input name="correct_number" type="number" inputmode="numeric" step="1" min="0" pattern="[0-9]*" oninput="this.value=this.value.replace(/\D+/g,'')" placeholder="0" />
         </div>
-        <p style="margin:10px 0 6px;"><strong>Risposta corretta</strong></p>
-        <div class="correct-row">
-          <label><input type="radio" name="correct_option" value="0" checked required /> A</label>
-          <label><input type="radio" name="correct_option" value="1" /> B</label>
-          <label><input type="radio" name="correct_option" value="2" /> C</label>
-          <label><input type="radio" name="correct_option" value="3" /> D</label>
+        <div id="addOptionsWrap">
+          <div class="dialog-grid">
+            <input name="opt0" id="addOpt0" placeholder="Opzione A" required />
+            <input name="opt1" id="addOpt1" placeholder="Opzione B" required />
+            <input name="opt2" id="addOpt2" placeholder="Opzione C" required />
+            <input name="opt3" id="addOpt3" placeholder="Opzione D" required />
+          </div>
+          <div id="addCorrectSingle">
+            <p style="margin:10px 0 6px;"><strong>Risposta corretta</strong></p>
+            <div class="correct-row">
+              <label><input type="radio" name="correct_option" value="0" checked /> A</label>
+              <label><input type="radio" name="correct_option" value="1" /> B</label>
+              <label><input type="radio" name="correct_option" value="2" /> C</label>
+              <label><input type="radio" name="correct_option" value="3" /> D</label>
+            </div>
+          </div>
+          <div id="addCorrectMulti" class="hidden">
+            <p style="margin:10px 0 6px;"><strong>Risposte corrette</strong></p>
+            <div class="correct-multi">
+              <label><input type="checkbox" name="correct_options" value="0" /> A</label>
+              <label><input type="checkbox" name="correct_options" value="1" /> B</label>
+              <label><input type="checkbox" name="correct_options" value="2" /> C</label>
+              <label><input type="checkbox" name="correct_options" value="3" /> D</label>
+            </div>
+          </div>
         </div>
         <div class="dialog-actions">
           <button type="submit">Salva</button>
-          <button type="button" class="close-dialog">Annulla</button>
         </div>
       </form>
     </div>
@@ -304,33 +459,57 @@
 
   <dialog id="editQuestionDialog">
     <div class="dialog-body">
-      <div class="dialog-head"><h3 class="btn-icon" style="margin:0;"><span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.69 3.86 5.45 5.45a1.2 1.2 0 0 1 0 1.69l-9.8 9.8a2 2 0 0 1-1.02.54l-4.13.9a1 1 0 0 1-1.2-1.2l.9-4.13a2 2 0 0 1 .54-1.02l9.8-9.8a1.2 1.2 0 0 1 1.69 0Zm-8.1 13.4-.5 2.3 2.3-.5 8.89-8.9-1.8-1.8-8.89 8.9Z"/></svg></span><span>Modifica domanda <span id="editQuestionTitle"></span></span></h3></div>
-      <form method="post">
+      <div class="dialog-head">
+        <h3 style="margin:0;">Modifica domanda <span id="editQuestionTitle"></span></h3>
+        <button type="button" class="close-dialog dialog-close-x" title="Chiudi" aria-label="Chiudi">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12l5.59-5.59Z"/></svg>
+        </button>
+      </div>
+      <form method="post" enctype="multipart/form-data">
         <input type="hidden" name="action" value="update_question" />
         <input type="hidden" name="question_id" id="editQuestionId" />
-        <div class="dialog-grid">
-          <input name="position" id="editPosition" type="number" min="1" placeholder="Posizione" required />
-          <input name="points" id="editPoints" type="number" min="1" required />
-        </div>
-        <div class="dialog-grid-1">
+        <input type="hidden" name="existing_image_url" id="editExistingImageUrl" />
+        <input type="hidden" name="question_kind" id="editQuestionKind" value="single" />
+        <div class="dialog-grid-1" style="margin-top:10px;">
           <textarea name="question_text" id="editQuestionText" placeholder="Testo domanda" required></textarea>
+          <input type="file" name="image_file" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" />
+          <small class="muted image-upload-help" id="editImageHint">Nessuna immagine caricata.</small>
+          <div class="image-preview-inline">
+            <p class="muted"><strong>Anteprima immagine attuale</strong></p>
+            <img id="editImagePreview" src="" alt="Anteprima immagine domanda esame" style="display:none;" />
+          </div>
         </div>
-        <div class="dialog-grid">
-          <input name="opt0" id="editOpt0" placeholder="Opzione A" required />
-          <input name="opt1" id="editOpt1" placeholder="Opzione B" required />
-          <input name="opt2" id="editOpt2" placeholder="Opzione C" required />
-          <input name="opt3" id="editOpt3" placeholder="Opzione D" required />
+        <div id="editNumberWrap" class="hidden" style="margin-top: 10px;">
+          <input name="correct_number" id="editCorrectNumber" type="number" inputmode="numeric" step="1" min="0" pattern="[0-9]*" oninput="this.value=this.value.replace(/\D+/g,'')" placeholder="0" />
         </div>
-        <p style="margin:10px 0 6px;"><strong>Risposta corretta</strong></p>
-        <div class="correct-row">
-          <label><input type="radio" name="correct_option" value="0" id="editCorrect0" required /> A</label>
-          <label><input type="radio" name="correct_option" value="1" id="editCorrect1" /> B</label>
-          <label><input type="radio" name="correct_option" value="2" id="editCorrect2" /> C</label>
-          <label><input type="radio" name="correct_option" value="3" id="editCorrect3" /> D</label>
+        <div id="editOptionsWrap">
+          <div class="dialog-grid">
+            <input name="opt0" id="editOpt0" placeholder="Opzione A" required />
+            <input name="opt1" id="editOpt1" placeholder="Opzione B" required />
+            <input name="opt2" id="editOpt2" placeholder="Opzione C" required />
+            <input name="opt3" id="editOpt3" placeholder="Opzione D" required />
+          </div>
+          <div id="editCorrectSingle">
+            <p style="margin:10px 0 6px;"><strong>Risposta corretta</strong></p>
+            <div class="correct-row">
+              <label><input type="radio" name="correct_option" value="0" id="editCorrect0" /> A</label>
+              <label><input type="radio" name="correct_option" value="1" id="editCorrect1" /> B</label>
+              <label><input type="radio" name="correct_option" value="2" id="editCorrect2" /> C</label>
+              <label><input type="radio" name="correct_option" value="3" id="editCorrect3" /> D</label>
+            </div>
+          </div>
+          <div id="editCorrectMulti" class="hidden">
+            <p style="margin:10px 0 6px;"><strong>Risposte corrette</strong></p>
+            <div class="correct-multi">
+              <label><input type="checkbox" name="correct_options" value="0" id="editCorrectM0" /> A</label>
+              <label><input type="checkbox" name="correct_options" value="1" id="editCorrectM1" /> B</label>
+              <label><input type="checkbox" name="correct_options" value="2" id="editCorrectM2" /> C</label>
+              <label><input type="checkbox" name="correct_options" value="3" id="editCorrectM3" /> D</label>
+            </div>
+          </div>
         </div>
         <div class="dialog-actions">
-          <button type="submit">Salva modifiche</button>
-          <button type="button" class="close-dialog">Annulla</button>
+          <button type="submit">Salva</button>
         </div>
       </form>
     </div>
@@ -345,7 +524,42 @@
     const openAddQuestion = document.getElementById("openAddQuestion");
 
     if (openCreateExam) openCreateExam.addEventListener("click", () => createExamDialog.showModal());
-    if (openAddQuestion) openAddQuestion.addEventListener("click", () => addQuestionDialog.showModal());
+
+    const addNumberWrap = document.getElementById("addNumberWrap");
+    const addOptionsWrap = document.getElementById("addOptionsWrap");
+    const addCorrectSingle = document.getElementById("addCorrectSingle");
+    const addCorrectMulti = document.getElementById("addCorrectMulti");
+    const addOpt0 = document.getElementById("addOpt0");
+    const addOpt1 = document.getElementById("addOpt1");
+    const addOpt2 = document.getElementById("addOpt2");
+    const addOpt3 = document.getElementById("addOpt3");
+
+    function setAddKind(kind) {
+      const isNumber = kind === "number";
+      const isMulti = kind === "multi_many";
+      if (addNumberWrap) addNumberWrap.classList.toggle("hidden", !isNumber);
+      if (addOptionsWrap) addOptionsWrap.classList.toggle("hidden", isNumber);
+      if (addCorrectSingle) addCorrectSingle.classList.toggle("hidden", isMulti || isNumber);
+      if (addCorrectMulti) addCorrectMulti.classList.toggle("hidden", !isMulti);
+      [addOpt0, addOpt1, addOpt2, addOpt3].forEach((el) => {
+        if (!el) return;
+        if (isNumber) el.removeAttribute("required");
+        else el.setAttribute("required", "required");
+      });
+    }
+
+    if (openAddQuestion) {
+      openAddQuestion.addEventListener("click", () => {
+        const singleRadio = document.getElementById("at-single");
+        if (singleRadio) singleRadio.checked = true;
+        setAddKind("single");
+        addQuestionDialog.showModal();
+      });
+    }
+
+    document.querySelectorAll("#addTypeRow input[name='question_kind']").forEach((el) => {
+      el.addEventListener("change", () => setAddKind(el.value));
+    });
 
     document.querySelectorAll(".close-dialog").forEach((el) => {
       el.addEventListener("click", () => {
@@ -357,29 +571,153 @@
 
     const editQuestionTitle = document.getElementById("editQuestionTitle");
     const editQuestionId = document.getElementById("editQuestionId");
-    const editPosition = document.getElementById("editPosition");
-    const editPoints = document.getElementById("editPoints");
+    const editQuestionKind = document.getElementById("editQuestionKind");
     const editQuestionText = document.getElementById("editQuestionText");
+    const editExistingImageUrl = document.getElementById("editExistingImageUrl");
+    const editImageHint = document.getElementById("editImageHint");
+    const editImagePreview = document.getElementById("editImagePreview");
     const editOpt0 = document.getElementById("editOpt0");
     const editOpt1 = document.getElementById("editOpt1");
     const editOpt2 = document.getElementById("editOpt2");
     const editOpt3 = document.getElementById("editOpt3");
+    const editNumberWrap = document.getElementById("editNumberWrap");
+    const editOptionsWrap = document.getElementById("editOptionsWrap");
+    const editCorrectSingle = document.getElementById("editCorrectSingle");
+    const editCorrectMulti = document.getElementById("editCorrectMulti");
+    const editCorrectNumber = document.getElementById("editCorrectNumber");
+    const editCorrectM0 = document.getElementById("editCorrectM0");
+    const editCorrectM1 = document.getElementById("editCorrectM1");
+    const editCorrectM2 = document.getElementById("editCorrectM2");
+    const editCorrectM3 = document.getElementById("editCorrectM3");
+
+    function setEditKind(kind) {
+      const isNumber = kind === "number";
+      const isMulti = kind === "multi_many";
+      if (editNumberWrap) editNumberWrap.classList.toggle("hidden", !isNumber);
+      if (editOptionsWrap) editOptionsWrap.classList.toggle("hidden", isNumber);
+      if (editCorrectSingle) editCorrectSingle.classList.toggle("hidden", isMulti || isNumber);
+      if (editCorrectMulti) editCorrectMulti.classList.toggle("hidden", !isMulti);
+      if (editQuestionKind) editQuestionKind.value = kind;
+      [editOpt0, editOpt1, editOpt2, editOpt3].forEach((el) => {
+        if (!el) return;
+        if (isNumber) el.removeAttribute("required");
+        else el.setAttribute("required", "required");
+      });
+    }
 
     document.querySelectorAll(".edit-question-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         editQuestionId.value = btn.dataset.id;
         editQuestionTitle.textContent = `#${btn.dataset.id}`;
-        editPosition.value = btn.dataset.position;
-        editPoints.value = btn.dataset.points;
         editQuestionText.value = btn.dataset.question;
-        editOpt0.value = btn.dataset.opt0;
-        editOpt1.value = btn.dataset.opt1;
-        editOpt2.value = btn.dataset.opt2;
-        editOpt3.value = btn.dataset.opt3;
-        const correct = btn.dataset.correct;
-        const radio = document.getElementById(`editCorrect${correct}`);
-        if (radio) radio.checked = true;
+        editExistingImageUrl.value = btn.dataset.image || "";
+        editImageHint.textContent = btn.dataset.image
+          ? "Immagine attuale presente. Per cambiarla, carica un nuovo file."
+          : "Nessuna immagine presente per questa domanda.";
+        if (btn.dataset.image) {
+          editImagePreview.src = btn.dataset.image;
+          editImagePreview.style.display = "block";
+        } else {
+          editImagePreview.src = "";
+          editImagePreview.style.display = "none";
+        }
+        editOpt0.value = btn.dataset.opt0 || "";
+        editOpt1.value = btn.dataset.opt1 || "";
+        editOpt2.value = btn.dataset.opt2 || "";
+        editOpt3.value = btn.dataset.opt3 || "";
+        const kind = (btn.dataset.kind || "single").toLowerCase();
+        setEditKind(kind);
+        if (kind === "number") {
+          if (editCorrectNumber) editCorrectNumber.value = btn.dataset.correctNumber || "";
+        } else if (kind === "single") {
+          const correct = btn.dataset.correct;
+          const radio = document.getElementById(`editCorrect${correct}`);
+          if (radio) radio.checked = true;
+        } else {
+          const corr = (btn.dataset.correctOptions || "").split(",").filter((x) => x !== "");
+          const set = new Set(corr);
+          if (editCorrectM0) editCorrectM0.checked = set.has("0");
+          if (editCorrectM1) editCorrectM1.checked = set.has("1");
+          if (editCorrectM2) editCorrectM2.checked = set.has("2");
+          if (editCorrectM3) editCorrectM3.checked = set.has("3");
+        }
         editQuestionDialog.showModal();
+      });
+    });
+
+    /* ── Animated move ─────────────────────────────────── */
+    let moving = false;
+    function animateSwap(rowA, rowB, direction) {
+      const hA = rowA.offsetHeight;
+      const hB = rowB.offsetHeight;
+      rowA.style.transition = "transform .25s ease";
+      rowB.style.transition = "transform .25s ease";
+      rowA.style.transform = direction === "up" ? `translateY(-${hB}px)` : `translateY(${hB}px)`;
+      rowB.style.transform = direction === "up" ? `translateY(${hA}px)` : `translateY(-${hA}px)`;
+
+      rowA.addEventListener("transitionend", function handler() {
+        rowA.removeEventListener("transitionend", handler);
+        rowA.style.transition = "none";
+        rowB.style.transition = "none";
+        rowA.style.transform = "";
+        rowB.style.transform = "";
+        if (direction === "up") {
+          rowA.parentNode.insertBefore(rowA, rowB);
+        } else {
+          rowA.parentNode.insertBefore(rowB, rowA);
+        }
+        /* swap position numbers */
+        const posA = rowA.querySelector("td:first-child strong");
+        const posB = rowB.querySelector("td:first-child strong");
+        if (posA && posB) {
+          const tmp = posA.textContent;
+          posA.textContent = posB.textContent;
+          posB.textContent = tmp;
+        }
+        rowA.classList.add("row-flash");
+        setTimeout(() => rowA.classList.remove("row-flash"), 400);
+        updateMoveButtons();
+        moving = false;
+      }, { once: true });
+    }
+
+    function updateMoveButtons() {
+      const tbody = document.querySelector(".exam-table tbody");
+      if (!tbody) return;
+      const rows = tbody.querySelectorAll("tr[id^='q-']");
+      rows.forEach((row, i) => {
+        const up = row.querySelector(".move-up");
+        const down = row.querySelector(".move-down");
+        if (up) up.disabled = i === 0;
+        if (down) down.disabled = i === rows.length - 1;
+      });
+    }
+
+    document.querySelectorAll(".move-up, .move-down").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        if (moving) return;
+        moving = true;
+        const qid = btn.dataset.id;
+        const direction = btn.classList.contains("move-up") ? "up" : "down";
+        const row = document.getElementById("q-" + qid);
+        if (!row) { moving = false; return; }
+        const sibling = direction === "up" ? row.previousElementSibling : row.nextElementSibling;
+        if (!sibling || !sibling.id || !sibling.id.startsWith("q-")) { moving = false; return; }
+
+        const body = new FormData();
+        body.append("action", "move_question");
+        body.append("question_id", qid);
+        body.append("direction", direction);
+        fetch("", { method: "POST", headers: { "X-Requested-With": "XMLHttpRequest" }, body })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data.ok) {
+              animateSwap(row, sibling, direction);
+            } else {
+              moving = false;
+            }
+          })
+          .catch(() => { moving = false; });
       });
     });
   </script>

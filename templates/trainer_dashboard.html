@@ -7,9 +7,12 @@
     </div>
     <div class="page-actions">
       <a class="btn" href="{{ url_for('trainer.participants') }}">Partecipanti</a>
-      <a class="btn" href="{{ url_for('trainer.pool') }}">Pool domande</a>
+      <a class="btn" href="{{ url_for('trainer.pool') }}">Domande</a>
       <a class="btn" href="{{ url_for('trainer.exam') }}">Esami</a>
       <a class="btn" href="{{ url_for('trainer.reports') }}">Report</a>
+      {% if session.get("trainer_is_admin") %}
+        <a class="btn" href="{{ url_for('admin.users') }}">Gestione utenti</a>
+      {% endif %}
     </div>
   </div>
 
@@ -25,8 +28,15 @@
       <p class="muted">Report completati: {{ reports|length }}</p>
     </div>
     <div class="card">
-      <p class="muted">Pool domande</p>
-      <p><strong>B2:</strong> {{ pool_counts[2] }} | <strong>B3:</strong> {{ pool_counts[3] }} | <strong>B4:</strong> {{ pool_counts[4] }}</p>
+      {% set total_pool = (pool_counts[2] + pool_counts[3] + pool_counts[4]) %}
+      <p class="muted">Domande esercitazioni</p>
+      <p><strong>{{ total_pool }}</strong> totali</p>
+      <p class="muted" style="margin: 10px 0 0 0;">
+        Le domande vengono distribuite automaticamente nei blocchi 2/3/4 (pool interni).
+      </p>
+      <p class="muted" style="margin: 6px 0 0 0;">
+        Avvio esercitazione: <strong>50</strong> domande casuali dal blocco selezionato.
+      </p>
     </div>
   </div>
 {% endblock %}

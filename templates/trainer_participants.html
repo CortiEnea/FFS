@@ -14,7 +14,7 @@
     .participant-item {
       border: 1px solid var(--line);
       border-radius: 14px;
-      background: #fff;
+      background: var(--card-bg);
       overflow: hidden;
     }
     .participant-item > summary {
@@ -63,7 +63,7 @@
     .participant-card {
       border: 1px solid var(--line);
       border-radius: 14px;
-      background: #fff;
+      background: var(--card-bg);
       padding: 12px;
     }
     .participant-footer {
@@ -125,6 +125,77 @@
       padding: 10px 10px;
       text-align: center;
     }
+    .tiny-btn--danger {
+      background: linear-gradient(120deg, #b91c1c, #991b1b);
+    }
+    .tiny-btn--ghost {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+    .tiny-btn--ghost:hover {
+      background: var(--surface-2);
+      transform: none;
+      box-shadow: none;
+    }
+    .new-participant-help {
+      margin: 0;
+      line-height: 1.4;
+      font-size: 13px;
+    }
+    .new-participant-actions button {
+      width: 100%;
+    }
+    .new-participant-card .card-head {
+      margin-bottom: 8px;
+    }
+    .new-participant-card .card-head h3 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+    }
+    .new-participant-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      background: linear-gradient(120deg, var(--brand-1), var(--brand-2));
+      box-shadow: 0 6px 14px rgba(235, 0, 0, .16);
+      flex-shrink: 0;
+    }
+    .new-participant-icon svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+      fill: currentColor;
+    }
+    .new-participant-card input {
+      padding: 12px 12px;
+    }
+    .new-participant-card .form-grid-2 {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: stretch;
+    }
+    .new-participant-card .form-grid-2 input,
+    .new-participant-card .form-grid-1 input {
+      min-height: 44px;
+    }
+    .new-participant-card input {
+      margin: 0;
+      line-height: 1.2;
+      width: 100%;
+      min-width: 0;
+    }
+    .exam-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
     .edit-secret {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
@@ -179,9 +250,14 @@
   </div>
 
   <div class="participants-layout">
-    <div class="card">
+    <div class="card new-participant-card">
       <div class="card-head">
-        <h3>Nuovo partecipante</h3>
+        <h3>
+          <span class="new-participant-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M15 12a4 4 0 1 0-8 0 4 4 0 0 0 8 0Zm2 8a1 1 0 1 0 2 0c0-3.314-3.582-6-8-6s-8 2.686-8 6a1 1 0 1 0 2 0c0-2.21 2.686-4 6-4s6 1.79 6 4Zm3-9a1 1 0 0 0 0-2h-2V7a1 1 0 0 0-2 0v2h-2a1 1 0 1 0 0 2h2v2a1 1 0 1 0 2 0v-2h2Z"/></svg>
+          </span>
+          Nuovo partecipante
+        </h3>
       </div>
       <form method="post" class="stack-md">
         <input type="hidden" name="action" value="create_participant" />
@@ -192,8 +268,7 @@
         <div class="form-grid-1">
           <input type="password" name="password" placeholder="Password accesso sito" required />
         </div>
-        <p class="muted">La password esame viene creata quando abiliti l'utente su una sessione attiva.</p>
-        <div class="page-actions">
+        <div class="page-actions new-participant-actions">
           <button type="submit">Crea partecipante</button>
         </div>
       </form>
@@ -275,23 +350,20 @@
                     readonly
                   />
                   {% if active_session %}
-                    <form method="post" class="edit-secret" style="margin-top:8px;">
-                      <input type="hidden" name="action" value="update_exam_password" />
-                      <input type="hidden" name="user_id" value="{{ p.id }}" />
-                      <input
-                        type="text"
-                        name="new_exam_password"
-                        minlength="4"
-                        placeholder="Nuova password esame"
-                        required
-                      />
-                      <button type="submit" class="tiny-btn">Salva</button>
-                    </form>
-                    <form method="post" class="quick-row">
+                    <p class="muted new-participant-help" style="margin-top:8px;">
+                      {% if session_info and session_info.exam_password_plain %}
+                        Puoi rigenerare la password per questa sessione.
+                      {% else %}
+                        Genera la password per questa sessione.
+                      {% endif %}
+                    </p>
+                    <form method="post" class="exam-actions">
                       <input type="hidden" name="action" value="generate_exam_password" />
                       <input type="hidden" name="user_id" value="{{ p.id }}" />
                       <input type="hidden" name="username" value="{{ p.username }}" />
-                      <button type="submit" class="tiny-btn">Genera</button>
+                      <button type="submit" class="tiny-btn">
+                        {{ "Rigenera" if session_info and session_info.exam_password_plain else "Genera" }}
+                      </button>
                     </form>
                   {% endif %}
                 </section>
@@ -300,7 +372,7 @@
                 <form method="post" onsubmit="return confirm('Eliminare il partecipante {{ p.full_name }}?');">
                   <input type="hidden" name="action" value="delete_participant" />
                   <input type="hidden" name="user_id" value="{{ p.id }}" />
-                  <button type="submit" class="tiny-btn">Elimina</button>
+                  <button type="submit" class="tiny-btn tiny-btn--danger">Elimina</button>
                 </form>
               </div>
             </article>

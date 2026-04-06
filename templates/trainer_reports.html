@@ -27,7 +27,7 @@
               <td>{{ r.id }}</td>
               <td>{{ r.full_name }} ({{ r.username }})</td>
               <td>{{ r.session_title }}</td>
-              <td>{{ r.finished_at }}</td>
+              <td>{{ r.finished_at|swiss_date }}</td>
               <td><a href="{{ url_for('trainer.report_detail', attempt_id=r.id) }}">Apri</a></td>
             </tr>
           {% else %}

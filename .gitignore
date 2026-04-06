@@ -37,6 +37,7 @@ instance/
 *.db
 *.sqlite
 *.sqlite3
+database.db
 
 # Secrets and local environment files
 .env
@@ -45,8 +46,16 @@ instance/
 
 # IDE / OS noise
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
 .idea/
 .vscode/
 
 # Project-specific local credentials
 CREDENZIALI_TEST.txt
+
+# Uploaded question images (local content)
+static/uploads/questions/
+static/uploads/

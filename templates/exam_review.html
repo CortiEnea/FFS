@@ -10,7 +10,7 @@
       <table>
         <thead>
           <tr>
-            <th>#</th>
+            <th>N.</th>
             <th>Domanda</th>
             <th>Stato</th>
             <th>Azione</th>
@@ -20,9 +20,20 @@
           {% for row in rows %}
             <tr>
               <td>{{ row.i + 1 }}</td>
-              <td>{{ row.q.question_text }}</td>
               <td>
-                {% if row.selected is none %}
+                {{ row.q.question_text }}
+                {% if row.q.image_url %}
+                  <div style="margin-top:6px;">
+                    <img
+                      src="{{ row.q.image_url }}"
+                      alt="Immagine domanda {{ row.i + 1 }}"
+                      style="max-width:140px; max-height:90px; border:1px solid var(--line); border-radius:8px; object-fit:cover;"
+                    />
+                  </div>
+                {% endif %}
+              </td>
+              <td>
+                {% if not row.has_answer %}
                   <span class="ko">Non risposta</span>
                 {% else %}
                   Risposta salvata

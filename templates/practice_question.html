@@ -1,43 +1,471 @@
 {% extends "layout.html" %}
 {% block content %}
+  <style>
+    .practice-shell { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 14px; align-items: start; }
+    .practice-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+    .practice-top h2 { margin: 0 0 6px 0; }
+    .practice-exit { display: inline-flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: #fff; color: var(--text); text-decoration: none; font-weight: 800; }
+    .practice-exit:hover { background: var(--surface-2); transform: none; box-shadow: none; }
+    .practice-exit svg { width: 18px; height: 18px; fill: currentColor; display: block; }
+    .practice-question { margin-bottom: 12px; }
+    .practice-content { max-width: 1040px; margin: 0 auto; }
+    .practice-content form.stack-md { padding-bottom: 0; }
+    .qa-layout { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .qa-layout.has-image { grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.85fr); align-items: start; }
+    .practice-image { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: #fff; }
+    .practice-image img {
+      width: 100%;
+      height: clamp(320px, 42vh, 520px);
+      object-fit: cover;
+      display: block;
+    }
+    .practice-question p { margin: 0; font-size: 18px; line-height: 1.35; letter-spacing: -0.01em; }
+
+    .answers {
+      display: grid;
+      gap: 10px;
+      margin-top: 0;
+    }
+    .answer-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+      transition: background .15s ease, border-color .15s ease, box-shadow .15s ease, transform .12s ease;
+    }
+    .answer-option:hover {
+      background: var(--surface-2);
+      border-color: rgba(17, 24, 39, 0.18);
+      box-shadow: 0 4px 14px rgba(17, 24, 39, 0.08);
+      transform: translateY(-1px);
+    }
+    .answer-option:has(input:checked) {
+      border-color: rgba(235, 0, 0, 0.45);
+      box-shadow: 0 0 0 3px rgba(235, 0, 0, 0.10);
+      background: rgba(235, 0, 0, 0.03);
+      transform: none;
+    }
+    .answer-option input[type="radio"] {
+      margin-top: 2px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--brand-1);
+      flex-shrink: 0;
+    }
+    .answer-option input[type="checkbox"] {
+      margin-top: 2px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--brand-1);
+      flex-shrink: 0;
+    }
+    .answers.is-multi-one .answer-option input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 2px solid rgba(17, 24, 39, 0.28);
+      display: inline-block;
+      position: relative;
+      background: #fff;
+    }
+    .answers.is-multi-one .answer-option input[type="checkbox"]:checked {
+      border-color: var(--brand-1);
+      box-shadow: 0 0 0 3px rgba(235, 0, 0, 0.12);
+    }
+    .answers.is-multi-one .answer-option input[type="checkbox"]:checked::after {
+      content: "";
+      position: absolute;
+      inset: 3px;
+      border-radius: 999px;
+      background: var(--brand-1);
+    }
+    .number-wrap {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .number-wrap label {
+      display: block;
+      font-weight: 900;
+      margin-bottom: 8px;
+      color: var(--th-color);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      font-size: 13px;
+    }
+    .number-wrap input[type="number"] {
+      width: 100%;
+      min-width: 0;
+      padding: 14px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .answer-option-text {
+      flex: 1;
+      min-width: 0;
+      font-size: 15px;
+      line-height: 1.35;
+      color: var(--text);
+    }
+    .answer-option-letter {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      background: rgba(17, 24, 39, 0.06);
+      color: var(--th-color);
+      font-weight: 900;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+
+    /* Feedback states reuse existing .answer.correct/.answer.wrong */
+    .answer.correct,
+    .answer.wrong {
+      border-radius: 14px;
+    }
+    label.answer.correct { border-color: rgba(69, 212, 144, .55); background: rgba(69, 212, 144, .06); }
+    label.answer.wrong { border-color: rgba(255, 122, 142, .60); background: rgba(255, 122, 142, .06); }
+    label.answer.correct:has(input:checked) { box-shadow: 0 0 0 3px rgba(69, 212, 144, .14); }
+    label.answer.wrong:has(input:checked) { box-shadow: 0 0 0 3px rgba(255, 122, 142, .14); }
+    label.answer.correct .answer-option-letter {
+      background: rgba(69, 212, 144, .22);
+      color: #15803d;
+    }
+    label.answer.wrong .answer-option-letter {
+      background: rgba(255, 122, 142, .22);
+      color: #be123c;
+    }
+    .answer-feedback-icon {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      margin-left: auto;
+      padding-left: 8px;
+    }
+    .answer-feedback-icon svg { width: 18px; height: 18px; }
+    .answer-feedback-icon.icon-correct svg { fill: #15803d; }
+    .answer-feedback-icon.icon-wrong svg { fill: #be123c; }
+    .feedback-box {
+      margin-top: 14px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 15px;
+      line-height: 1.4;
+    }
+    .feedback-box.is-correct {
+      background: rgba(69, 212, 144, .10);
+      border: 1px solid rgba(69, 212, 144, .45);
+      color: #15803d;
+    }
+    .feedback-box.is-wrong {
+      background: rgba(255, 122, 142, .10);
+      border: 1px solid rgba(255, 122, 142, .50);
+      color: #be123c;
+    }
+    .feedback-box .feedback-detail {
+      font-weight: 400;
+      font-size: 14px;
+      margin-top: 4px;
+      opacity: .85;
+    }
+    .nav-bottom {
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      margin: 16px -16px -16px;
+      padding: 10px 16px;
+      border-top: 1px solid var(--table-line);
+      background: #fff;
+      box-shadow: 0 -6px 16px rgba(17, 24, 39, 0.06);
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-bottom button {
+      min-height: 40px;
+      padding: 0 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      letter-spacing: .01em;
+      box-shadow: 0 1px 2px rgba(17,24,39,.06);
+      transform: none;
+    }
+    .nav-bottom button:hover { transform: none; }
+    .nav-bottom .btn-ghost {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+    .nav-bottom .btn-ghost:hover { background: var(--surface-2); box-shadow: none; }
+    .nav-bottom .btn-primary {
+      min-width: 200px;
+    }
+    .nav-bottom button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .side-nav { position: sticky; top: 88px; }
+    .side-card { border: 1px solid var(--line); border-radius: 14px; background: var(--card-bg); padding: 12px; }
+    .side-title { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+    .side-title h3 { margin: 0; font-size: 14px; text-transform: uppercase; letter-spacing: .04em; color: var(--th-color); }
+    .qgrid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+    .qnum { display: inline-flex; align-items: center; justify-content: center; height: 38px; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--muted); text-decoration: none; font-weight: 800; }
+    .qnum:hover { background: var(--surface-2); color: var(--text); }
+    .qnum.is-current { background: linear-gradient(145deg, var(--brand-1), var(--brand-2)); border-color: transparent; color: #fff; box-shadow: 0 0 0 3px rgba(235,0,0,.14), 0 10px 22px rgba(235,0,0,.18); }
+    @media (max-width: 980px) {
+      .practice-shell { grid-template-columns: 1fr; }
+      .side-nav { position: static; }
+      .qgrid { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+      .practice-content { max-width: none; }
+      .qa-layout.has-image { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .qgrid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+      .nav-bottom { justify-content: stretch; }
+      .nav-bottom button { width: 100%; }
+      .nav-bottom .btn-primary { min-width: 0; }
+    }
+  </style>
+
   <div class="hero">
-    <h2>Esercitazione blocco {{ block_id }}</h2>
-    <p class="muted">Domanda {{ index }} di {{ total }}</p>
+    <div class="practice-top">
+      <div>
+        <h2>Esercitazione blocco {{ block_id }}</h2>
+        <p class="muted">N. {{ question.question_number or "?" }} — Domanda {{ index }} di {{ total }}</p>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <form method="post" style="margin:0;">
+          <button type="submit" name="action" value="finish" class="practice-exit" style="border-color:var(--primary);color:var(--primary);" title="Termina e salva risultato"
+            onclick="return confirm('Vuoi terminare l\'esercitazione e salvare il risultato?')">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17Z"/></svg>
+            Termina
+          </button>
+        </form>
+        <form method="post" style="margin:0;">
+          <button type="submit" name="action" value="exit" class="practice-exit" title="Esci senza salvare">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 1 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4Z"/></svg>
+            Esci
+          </button>
+        </form>
+      </div>
+    </div>
   </div>
-  <div class="card">
-    <p><strong>{{ question.question_text }}</strong></p>
-    <form method="post" class="stack-md">
-      {% for opt in question.options %}
-        {% set i = loop.index0 %}
-        {% set cls = "" %}
-        {% if feedback %}
-          {% if i == feedback.correct_option %}
-            {% set cls = "answer correct" %}
-          {% elif i == feedback.selected_option and not feedback.is_correct %}
-            {% set cls = "answer wrong" %}
-          {% endif %}
-        {% endif %}
-        <label class="{{ cls }}" style="display:block;">
-          <input
-            type="radio"
-            name="selected_option"
-            value="{{ i }}"
-            {% if feedback and i == feedback.selected_option %}checked{% endif %}
-            {% if feedback %}disabled{% endif %}
-          />
-          {{ opt }}
-        </label>
-      {% endfor %}
+
+  <div class="practice-shell">
+    <div class="card">
+      <div class="practice-content">
+        <div class="practice-question">
+          <p><strong>{{ question.question_text }}</strong></p>
+        </div>
+        <form method="post" class="stack-md">
+          <div class="qa-layout {% if question.image_url %}has-image{% endif %}">
+            {% if question.image_url %}
+              <div class="practice-image">
+                <img src="{{ question.image_url }}" alt="Immagine della domanda" />
+              </div>
+            {% endif %}
+            {% set kind = question.question_kind or 'single' %}
+            {% if kind == 'number' %}
+              <div class="number-wrap">
+                <label for="number_answer">Risposta (solo numeri)</label>
+                <input
+                  id="number_answer"
+                  type="number"
+                  name="number_answer"
+                  inputmode="numeric"
+                  step="1"
+                  min="0"
+                  placeholder="Es. 12"
+                  {% if feedback %}value="{{ feedback.selected_number }}" disabled
+                  style="border-color: {% if feedback.is_correct %}rgba(69,212,144,.55){% else %}rgba(255,122,142,.60){% endif %};"
+                  {% endif %}
+                />
+              </div>
+            {% elif kind in ('multi_one', 'multi_many') %}
+              <div class="answers {% if kind == 'multi_one' %}is-multi-one{% endif %}" role="group" aria-label="Risposte multiple">
+              {% for opt in question.options %}
+                {% set i = loop.index0 %}
+                {% set cls = "" %}
+                {% if feedback %}
+                  {% set corrects = feedback.correct_options if feedback.kind in ('multi_one','multi_many') else [] %}
+                  {% set selecteds = feedback.selected_options if feedback.kind in ('multi_one','multi_many') else [] %}
+                  {% if i in corrects %}
+                    {% set cls = "answer correct" %}
+                  {% elif i in selecteds and i not in corrects %}
+                    {% set cls = "answer wrong" %}
+                  {% endif %}
+                {% endif %}
+                <label class="answer-option {{ cls }}">
+                  <input
+                    type="checkbox"
+                    name="selected_options"
+                    value="{{ i }}"
+                    {% if feedback and feedback.kind in ('multi_one','multi_many') and i in feedback.selected_options %}checked{% endif %}
+                    {% if feedback %}disabled{% endif %}
+                  />
+                  <div class="answer-option-text">
+                    <span class="answer-option-letter">{{ ["A","B","C","D"][i] }}</span>{{ opt }}
+                  </div>
+                  {% if feedback and cls %}
+                    {% if 'correct' in cls %}
+                      <span class="answer-feedback-icon icon-correct"><svg viewBox="0 0 24 24"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17Z"/></svg></span>
+                    {% elif 'wrong' in cls %}
+                      <span class="answer-feedback-icon icon-wrong"><svg viewBox="0 0 24 24"><path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 1 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4Z"/></svg></span>
+                    {% endif %}
+                  {% endif %}
+                </label>
+              {% endfor %}
+              </div>
+            {% else %}
+              <div class="answers" role="radiogroup" aria-label="Risposte">
+              {% for opt in question.options %}
+                {% set i = loop.index0 %}
+                {% set cls = "" %}
+                {% if feedback %}
+                  {% if feedback.kind == 'single' and i == feedback.correct_option %}
+                    {% set cls = "answer correct" %}
+                  {% elif feedback.kind == 'single' and i == feedback.selected_option and not feedback.is_correct %}
+                    {% set cls = "answer wrong" %}
+                  {% endif %}
+                {% endif %}
+                <label class="answer-option {{ cls }}">
+                  <input
+                    type="radio"
+                    name="selected_option"
+                    value="{{ i }}"
+                    {% if feedback and feedback.kind == 'single' and i == feedback.selected_option %}checked{% endif %}
+                    {% if feedback %}disabled{% endif %}
+                  />
+                  <div class="answer-option-text">
+                    <span class="answer-option-letter">{{ ["A","B","C","D"][i] }}</span>{{ opt }}
+                  </div>
+                  {% if feedback and cls %}
+                    {% if 'correct' in cls %}
+                      <span class="answer-feedback-icon icon-correct"><svg viewBox="0 0 24 24"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17Z"/></svg></span>
+                    {% elif 'wrong' in cls %}
+                      <span class="answer-feedback-icon icon-wrong"><svg viewBox="0 0 24 24"><path d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59 7.11 5.7A1 1 0 1 0 5.7 7.11L10.59 12 5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4Z"/></svg></span>
+                    {% endif %}
+                  {% endif %}
+                </label>
+              {% endfor %}
+              </div>
+            {% endif %}
+          </div>
       {% if feedback %}
         {% if feedback.is_correct %}
-          <p class="ok"><strong>Risposta corretta.</strong></p>
+          <div class="feedback-box is-correct">
+            Risposta esatta!
+          </div>
         {% else %}
-          <p class="ko"><strong>Risposta errata.</strong></p>
+          <div class="feedback-box is-wrong">
+            Risposta errata.
+            <div class="feedback-detail">
+              {% if feedback.kind == 'number' %}
+                La risposta corretta era <strong>{{ feedback.correct_number }}</strong>.
+              {% elif feedback.kind in ('multi_one', 'multi_many') %}
+                {% set corr = feedback.correct_options or [] %}
+                {%- set out = [] -%}
+                {%- for i in corr -%}
+                  {%- if i in (0,1,2,3) -%}
+                    {%- set _ = out.append(["A","B","C","D"][i]) -%}
+                  {%- endif -%}
+                {%- endfor -%}
+                {% if out|length == 1 %}
+                  La risposta corretta era <strong>{{ out[0] }}</strong>.
+                {% else %}
+                  Le risposte corrette erano <strong>{{ out|join(", ") }}</strong>.
+                {% endif %}
+              {% else %}
+                La risposta corretta era <strong>{{ ["A","B","C","D"][feedback.correct_option] }}</strong>.
+              {% endif %}
+            </div>
+          </div>
         {% endif %}
-        <div class="page-actions"><button type="submit" name="action" value="next">Prossima domanda</button></div>
+        <div class="nav-bottom">
+          <button type="submit" name="action" value="prev" class="btn-ghost" {% if index <= 1 %}disabled{% endif %}>
+            Indietro
+          </button>
+          {% if index >= total %}
+            <button type="submit" name="action" value="finish" class="btn-primary">
+              Termina
+            </button>
+          {% else %}
+            <button type="submit" name="action" value="next" class="btn-primary">
+              Avanti
+            </button>
+          {% endif %}
+        </div>
       {% else %}
-        <div class="page-actions"><button type="submit" name="action" value="answer">Conferma risposta</button></div>
+        <div class="nav-bottom">
+          <button type="submit" name="action" value="prev" class="btn-ghost" {% if index <= 1 %}disabled{% endif %}>
+            Indietro
+          </button>
+          <button type="submit" name="action" value="answer" class="btn-primary">
+            Conferma risposta
+          </button>
+        </div>
       {% endif %}
-    </form>
+        </form>
+      </div>
   </div>
+    <aside class="side-nav">
+      <div class="side-card">
+        <div class="side-title">
+          <h3>Domande</h3>
+          <span class="chip">{{ index }}/{{ total }}</span>
+        </div>
+        <div class="qgrid" aria-label="Navigazione domande">
+          {% for n in range(1, total + 1) %}
+            <a
+              class="qnum {% if n == index %}is-current{% endif %}"
+              href="{{ url_for('site.practice_question', block_id=block_id, q=n) }}"
+              title="Vai alla domanda {{ n }}"
+            >{{ n }}</a>
+          {% endfor %}
+        </div>
+      </div>
+    </aside>
+  </div>
+  <script>
+    (function () {
+      function initMultiOne() {
+        const wrap = document.querySelector(".answers.is-multi-one");
+        if (!wrap) return;
+        const boxes = Array.from(
+          wrap.querySelectorAll('input[type="checkbox"][name="selected_options"]')
+        );
+        if (!boxes.length) return;
+        boxes.forEach((box) => {
+          box.addEventListener("change", () => {
+            if (!box.checked) return;
+            boxes.forEach((other) => {
+              if (other !== box) other.checked = false;
+            });
+          });
+        });
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initMultiOne);
+      } else {
+        initMultiOne();
+      }
+    })();
+  </script>
 {% endblock %}

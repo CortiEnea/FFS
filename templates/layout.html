@@ -250,8 +250,11 @@
           <a href="{{ url_for('site.logout') }}">Logout</a>
         {% endif %}
         {% if session.get("trainer_id") %}
-          <a href="{{ url_for('trainer.dashboard') }}">Pannello Formatore</a>
-          <a href="{{ url_for('trainer.logout') }}">Logout Formatore</a>
+          <a href="{{ url_for('trainer.dashboard') }}">Pannello formatore</a>
+          {% if session.get("trainer_is_admin") %}
+            <a href="{{ url_for('admin.users') }}">Gestione utenti</a>
+          {% endif %}
+          <a href="{{ url_for('trainer.logout') }}">Logout</a>
         {% endif %}
         {% if not session.get("user_id") and not session.get("trainer_id") %}
           <a href="{{ url_for('site.login') }}">Login</a>

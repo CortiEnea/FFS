@@ -1,37 +1,269 @@
 {% extends "layout.html" %}
 {% block content %}
+  <style>
+    .exam-shell { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 14px; align-items: start; }
+    .exam-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+    .exam-top h2 { margin: 0 0 6px 0; }
+    .exam-top-actions { display: inline-flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .exam-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 800;
+    }
+    .exam-ghost:hover { background: var(--surface-2); transform: none; box-shadow: none; }
+    .exam-ghost svg { width: 18px; height: 18px; fill: currentColor; display: block; }
+
+    .exam-content { max-width: 1040px; margin: 0 auto; }
+    .exam-content form.stack-md { padding-bottom: 0; }
+    .qa-layout { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .qa-layout.has-image { grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.85fr); align-items: start; }
+    .exam-image { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: #fff; }
+    .exam-image img { width: 100%; height: clamp(320px, 42vh, 520px); object-fit: cover; display: block; }
+    .exam-question p { margin: 0; font-size: 18px; line-height: 1.35; letter-spacing: -0.01em; }
+
+    .answers { display: grid; gap: 10px; margin-top: 0; }
+    .answer-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+      transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
+    }
+    .answer-option:hover { background: var(--surface-2); border-color: rgba(17, 24, 39, 0.18); box-shadow: 0 4px 14px rgba(17, 24, 39, 0.08); }
+    .answer-option:has(input:checked) { border-color: rgba(235, 0, 0, 0.45); box-shadow: 0 0 0 3px rgba(235, 0, 0, 0.10); background: rgba(235, 0, 0, 0.03); }
+    .answer-option input[type="radio"] { margin-top: 2px; width: 18px; height: 18px; accent-color: var(--brand-1); flex-shrink: 0; }
+    .answer-option input[type="checkbox"] { margin-top: 2px; width: 18px; height: 18px; accent-color: var(--brand-1); flex-shrink: 0; }
+    .answer-option-text { flex: 1; min-width: 0; font-size: 15px; line-height: 1.35; color: var(--text); }
+    .answer-option-letter { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 10px; background: rgba(17, 24, 39, 0.06); color: var(--th-color); font-weight: 900; margin-right: 10px; flex-shrink: 0; }
+    .number-wrap {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .number-wrap label {
+      display: block;
+      font-weight: 900;
+      margin-bottom: 8px;
+      color: var(--th-color);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      font-size: 13px;
+    }
+    .number-wrap input[type="number"] {
+      width: 100%;
+      min-width: 0;
+      padding: 14px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .standby-row { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--table-line); }
+    .standby-row label { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; }
+
+    .nav-bottom {
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
+      margin: 16px -16px -16px;
+      padding: 10px 16px;
+      border-top: 1px solid var(--table-line);
+      background: #fff;
+      box-shadow: 0 -6px 16px rgba(17, 24, 39, 0.06);
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .nav-bottom button {
+      min-height: 40px;
+      padding: 0 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      letter-spacing: .01em;
+      box-shadow: 0 1px 2px rgba(17,24,39,.06);
+      transform: none;
+    }
+    .nav-bottom button:hover { transform: none; }
+    .nav-bottom .btn-ghost { background: #fff; color: var(--text); border: 1px solid var(--line); box-shadow: none; }
+    .nav-bottom .btn-ghost:hover { background: var(--surface-2); box-shadow: none; }
+    .nav-bottom .btn-primary { min-width: 200px; }
+
+    .side-nav { position: sticky; top: 88px; }
+    .side-card { border: 1px solid var(--line); border-radius: 14px; background: var(--card-bg); padding: 12px; }
+    .side-title { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+    .side-title h3 { margin: 0; font-size: 14px; text-transform: uppercase; letter-spacing: .04em; color: var(--th-color); }
+    .qgrid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+    .qnum { display: inline-flex; align-items: center; justify-content: center; height: 38px; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--muted); text-decoration: none; font-weight: 800; position: relative; }
+    .qnum:hover { background: var(--surface-2); color: var(--text); }
+    .qnum.is-current { background: linear-gradient(145deg, var(--brand-1), var(--brand-2)); border-color: transparent; color: #fff; box-shadow: 0 0 0 3px rgba(235,0,0,.14), 0 10px 22px rgba(235,0,0,.18); }
+    .qnum.is-answered { border-color: rgba(69, 212, 144, .55); }
+    .qnum.is-standby { border-color: rgba(245, 158, 11, .7); }
+    .qnum.is-answered::after {
+      content: "";
+      position: absolute;
+      right: 6px;
+      top: 6px;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(69, 212, 144, .92);
+    }
+    .qnum.is-standby::after {
+      content: "";
+      position: absolute;
+      right: 6px;
+      top: 6px;
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(245, 158, 11, .92);
+    }
+
+    @media (max-width: 980px) {
+      .exam-shell { grid-template-columns: 1fr; }
+      .side-nav { position: static; }
+      .qgrid { grid-template-columns: repeat(10, minmax(0, 1fr)); }
+      .exam-content { max-width: none; }
+      .qa-layout.has-image { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .qgrid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+      .nav-bottom { justify-content: stretch; }
+      .nav-bottom button { width: 100%; }
+      .nav-bottom .btn-primary { min-width: 0; }
+    }
+  </style>
+
   <div class="hero">
-    <h2>Esame in corso</h2>
-    <p class="muted">Domanda {{ index }} di {{ total }} - Tempo residuo: <span class="timer" id="timer"></span></p>
+    <div class="exam-top">
+      <div>
+        <h2>Esame in corso</h2>
+        <p class="muted">Domanda {{ index }} di {{ total }} - Tempo residuo: <span class="timer" id="timer"></span></p>
+      </div>
+      <div class="exam-top-actions">
+        <a class="exam-ghost" href="{{ url_for('site.exam_review') }}" title="Vai al riepilogo">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v2H4V6Zm0 5h10v2H4v-2Zm0 5h16v2H4v-2Z"/></svg>
+          Riepilogo
+        </a>
+      </div>
+    </div>
   </div>
 
-  <div class="card">
-    <p><strong>{{ question.question_text }}</strong></p>
-    <form method="post" class="stack-md">
-      {% for opt in question.options %}
-        {% set i = loop.index0 %}
-        <label style="display:block;">
-          <input
-            type="radio"
-            name="selected_option"
-            value="{{ i }}"
-            {% if answer and answer.selected_option == i %}checked{% endif %}
-          />
-          {{ opt }}
-        </label>
-      {% endfor %}
+  <div class="exam-shell">
+    <div class="card">
+      <div class="exam-content">
+        <div class="exam-question">
+          <p><strong>{{ question.question_text }}</strong></p>
+        </div>
+        <form method="post" class="stack-md">
+          <div class="qa-layout {% if question.image_url %}has-image{% endif %}">
+            {% if question.image_url %}
+              <div class="exam-image">
+                <img src="{{ question.image_url }}" alt="Immagine della domanda esame" />
+              </div>
+            {% endif %}
+            {% set kind = question.question_kind or 'single' %}
+            {% if kind == 'number' %}
+              <div class="number-wrap">
+                <label for="number_answer">Risposta (solo numeri)</label>
+                <input
+                  id="number_answer"
+                  type="number"
+                  name="number_answer"
+                  inputmode="numeric"
+                  step="1"
+                  min="0"
+                  placeholder="0"
+                  value="{{ (answer.selected_number or '') if answer else '' }}"
+                />
+              </div>
+            {% elif kind == 'multi_many' %}
+              <div class="answers" role="group" aria-label="Risposte multiple">
+              {% for opt in question.options %}
+                {% set i = loop.index0 %}
+                <label class="answer-option">
+                  <input
+                    type="checkbox"
+                    name="selected_options"
+                    value="{{ i }}"
+                    {% if answer and answer.selected_options and i in answer.selected_options %}checked{% endif %}
+                  />
+                  <div class="answer-option-text">
+                    <span class="answer-option-letter">{{ ["A","B","C","D"][i] }}</span>{{ opt }}
+                  </div>
+                </label>
+              {% endfor %}
+              </div>
+            {% else %}
+              <div class="answers" role="radiogroup" aria-label="Risposte">
+              {% for opt in question.options %}
+                {% set i = loop.index0 %}
+                <label class="answer-option">
+                  <input
+                    type="radio"
+                    name="selected_option"
+                    value="{{ i }}"
+                    {% if answer and answer.selected_option == i %}checked{% endif %}
+                  />
+                  <div class="answer-option-text">
+                    <span class="answer-option-letter">{{ ["A","B","C","D"][i] }}</span>{{ opt }}
+                  </div>
+                </label>
+              {% endfor %}
+              </div>
+            {% endif %}
+          </div>
 
-      <label style="display:block;">
-        <input type="checkbox" name="standby" value="1" {% if answer and answer.is_standby %}checked{% endif %} />
-        Metti questa domanda in standby
-      </label>
+          <div class="standby-row">
+            <label>
+              <input type="checkbox" name="standby" value="1" {% if answer and answer.is_standby %}checked{% endif %} />
+              Metti questa domanda in standby
+            </label>
+          </div>
 
-      <div class="page-actions">
-        <button type="submit" name="action" value="save_prev">Salva e precedente</button>
-        <button type="submit" name="action" value="save_next">Salva e successiva</button>
-        <button type="submit" name="action" value="review">Vai al riepilogo</button>
+          <div class="nav-bottom">
+            <button type="submit" name="action" value="save_prev" class="btn-ghost" {% if index <= 1 %}disabled{% endif %}>Indietro</button>
+            {% if index >= total %}
+              <button type="submit" name="action" value="review" class="btn-primary">Termina</button>
+            {% else %}
+              <button type="submit" name="action" value="save_next" class="btn-primary">Avanti</button>
+            {% endif %}
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
+
+    <aside class="side-nav">
+      <div class="side-card">
+        <div class="side-title">
+          <h3>Domande</h3>
+          <span class="chip">{{ index }}/{{ total }}</span>
+        </div>
+        <div class="qgrid" aria-label="Navigazione domande esame">
+          {% for it in nav_items %}
+            <a
+              class="qnum {% if it.pos + 1 == index %}is-current{% endif %} {% if it.answered %}is-answered{% endif %} {% if it.standby %}is-standby{% endif %}"
+              href="{{ url_for('site.exam_goto', position=it.pos) }}"
+              title="Vai alla domanda {{ it.pos + 1 }}"
+            >{{ it.pos + 1 }}</a>
+          {% endfor %}
+        </div>
+      </div>
+    </aside>
   </div>
 
   <script>

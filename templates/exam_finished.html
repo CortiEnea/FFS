@@ -2,21 +2,10 @@
 {% block content %}
   <div class="hero">
     <h2>Esame terminato</h2>
-    <p class="muted">Risultato ufficiale del tentativo completato.</p>
+    <p class="muted">Il tentativo è stato registrato correttamente.</p>
   </div>
   <div class="card">
-    <p><strong>Partecipante:</strong> {{ report.user.full_name }}</p>
-    <p><strong>Sessione:</strong> {{ report.session.title }}</p>
-    <p><strong>Punteggio:</strong> {{ report.scored_points }} / {{ report.total_points }}</p>
-    <p><strong>Percentuale:</strong> {{ report.percent }}%</p>
-    <p>
-      <strong>Esito:</strong>
-      {% if report.passed %}
-        <span class="ok">Sufficiente (>= 60%)</span>
-      {% else %}
-        <span class="ko">Insufficiente (&lt; 60%)</span>
-      {% endif %}
-    </p>
+    <p class="muted" style="margin:0;">Puoi ora tornare alla dashboard.</p>
   </div>
   <div class="page-actions">
     <a class="btn" href="{{ url_for('site.dashboard') }}">Torna alla dashboard</a>
