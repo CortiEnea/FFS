@@ -29,9 +29,11 @@ def create_app() -> Flask:
     app.secret_key = os.getenv("SECRET_KEY", "dev-secret-change-me")
     app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024
     app.jinja_env.filters["swiss_date"] = _swiss_date
+    app.config["READONLY_FS"] = bool(os.getenv("VERCEL"))
 
     uploads_dir = os.path.join(app.root_path, "static", "uploads", "questions")
-    os.makedirs(uploads_dir, exist_ok=True)
+    if not app.config["READONLY_FS"]:
+        os.makedirs(uploads_dir, exist_ok=True)
 
     app.register_blueprint(site)
     app.register_blueprint(trainer)

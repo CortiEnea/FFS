@@ -10,7 +10,9 @@ from datetime import datetime
 
 from werkzeug.security import generate_password_hash
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "database.db")
+DB_PATH = os.getenv("DATABASE_PATH") or (
+    "/tmp/database.db" if os.getenv("VERCEL") else os.path.join(os.path.dirname(__file__), "database.db")
+)
 
 
 def _row_factory(cursor: sqlite3.Cursor, row: tuple) -> dict:

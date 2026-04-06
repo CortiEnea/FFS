@@ -28,6 +28,8 @@ def trainer_required(f):
 def _save_uploaded_question_image(file_storage) -> tuple[str | None, str | None]:
     if not file_storage or not file_storage.filename:
         return None, None
+    if current_app.config.get("READONLY_FS"):
+        return None, "Upload immagini non disponibile in questo ambiente demo."
 
     safe_name = secure_filename(file_storage.filename)
     if "." not in safe_name:
@@ -38,11 +40,17 @@ def _save_uploaded_question_image(file_storage) -> tuple[str | None, str | None]
         return None, "Formato immagine non supportato. Usa PNG/JPG/JPEG/GIF/WEBP."
 
     upload_dir = os.path.join(current_app.root_path, "static", "uploads", "questions")
-    os.makedirs(upload_dir, exist_ok=True)
+    try:
+        os.makedirs(upload_dir, exist_ok=True)
+    except OSError:
+        return None, "Impossibile salvare file in questo ambiente."
 
     filename = f"{uuid.uuid4().hex}.{ext}"
     abs_path = os.path.join(upload_dir, filename)
-    file_storage.save(abs_path)
+    try:
+        file_storage.save(abs_path)
+    except OSError:
+        return None, "Impossibile salvare file in questo ambiente."
     return f"/static/uploads/questions/{filename}", None
 
 
