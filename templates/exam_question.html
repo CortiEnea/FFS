@@ -7,6 +7,10 @@
       filter: blur(14px) !important;
       transition: filter .12s ease;
     }
+    .ipad-shot-guard .hero,
+    .ipad-shot-guard .exam-shell {
+      filter: blur(4px);
+    }
     .exam-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
     .exam-top h2 { margin: 0 0 6px 0; }
     .exam-top-actions { display: inline-flex; gap: 10px; flex-wrap: wrap; align-items: center; }
@@ -347,6 +351,15 @@
     window.addEventListener("blur", () => {
       hideForSecurity();
     });
+
+    // iPad Safari: force blurred rendering during exam to degrade screenshots.
+    const ua = navigator.userAgent || "";
+    const isiPad =
+      /iPad/.test(ua) ||
+      (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+    if (isiPad) {
+      document.documentElement.classList.add("ipad-shot-guard");
+    }
 
     // On touch devices (tablet/phone), blur all visible content when app loses focus.
     const isTouchDevice = window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0;
