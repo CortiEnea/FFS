@@ -28,7 +28,14 @@
               <td>{{ r.full_name }} ({{ r.username }})</td>
               <td>{{ r.session_title }}</td>
               <td>{{ r.finished_at|swiss_date }}</td>
-              <td><a href="{{ url_for('trainer.report_detail', attempt_id=r.id) }}">Apri</a></td>
+              <td style="white-space:nowrap;">
+                <a href="{{ url_for('trainer.report_detail', attempt_id=r.id) }}">Apri</a>
+                <form method="post" style="display:inline;" onsubmit="return confirm('Eliminare questo report?');">
+                  <input type="hidden" name="action" value="delete_report" />
+                  <input type="hidden" name="attempt_id" value="{{ r.id }}" />
+                  <button type="submit" style="margin-left:8px; min-height:32px; padding:0 10px;">Elimina</button>
+                </form>
+              </td>
             </tr>
           {% else %}
             <tr><td colspan="5">Nessun report disponibile.</td></tr>

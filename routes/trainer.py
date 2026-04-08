@@ -475,7 +475,12 @@ def exam():
                 )
                 return redirect(url_for("trainer.exam"))
             position = max((q["position"] for q in current_questions), default=0) + 1
-            points = 1
+            points_raw = (request.form.get("points") or "1").strip()
+            try:
+                points = max(1, int(points_raw))
+            except ValueError:
+                flash("Punteggio non valido.", "error")
+                return redirect(url_for("trainer.exam"))
 
             question_kind = (request.form.get("question_kind") or "single").strip().lower()
             if question_kind not in ("number", "single", "multi_many"):
@@ -628,7 +633,12 @@ def exam():
                 return redirect(url_for("trainer.exam"))
 
             position = current["position"]
-            points = current["points"]
+            points_raw = (request.form.get("points") or str(current["points"])).strip()
+            try:
+                points = max(1, int(points_raw))
+            except ValueError:
+                flash("Punteggio non valido.", "error")
+                return redirect(url_for("trainer.exam"))
 
             question_kind = (request.form.get("question_kind") or "single").strip().lower()
             if question_kind not in ("number", "single", "multi_many"):
@@ -745,16 +755,32 @@ def exam():
     )
 
 
-@trainer.get("/reports")
+@trainer.route("/reports", methods=["GET", "POST"])
 @trainer_required
 def reports():
+    if request.method == "POST":
+        action = (request.form.get("action") or "").strip()
+        if action == "delete_report":
+            attempt_raw = (request.form.get("attempt_id") or "").strip()
+            if not attempt_raw.isdigit():
+                flash("Report non valido.", "error")
+                return redirect(url_for("trainer.reports"))
+            ok = db.delete_attempt(int(attempt_raw))
+            flash("Report eliminato." if ok else "Report non trovato.", "success" if ok else "error")
+            return redirect(url_for("trainer.reports"))
+        flash("Azione non valida.", "error")
+        return redirect(url_for("trainer.reports"))
     rows = db.list_completed_attempts()
     return render_template("trainer_reports.html", rows=rows)
 
 
-@trainer.get("/reports/<int:attempt_id>")
+@trainer.route("/reports/<int:attempt_id>", methods=["GET", "POST"])
 @trainer_required
 def report_detail(attempt_id: int):
+    if request.method == "POST":
+        ok = db.delete_attempt(attempt_id)
+        flash("Report eliminato." if ok else "Report non trovato.", "success" if ok else "error")
+        return redirect(url_for("trainer.reports"))
     report = db.build_attempt_report(attempt_id)
     if not report:
         flash("Report non trovato.", "error")

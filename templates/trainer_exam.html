@@ -298,6 +298,7 @@
           <tr>
             <th style="width:60px;">N.</th>
             <th>Domanda</th>
+            <th style="width:70px;">Punti</th>
             <th style="width:90px;">Corretta</th>
             <th style="width:210px;">Azione</th>
           </tr>
@@ -307,6 +308,7 @@
             <tr id="q-{{ q.id }}">
               <td><strong>{{ q.position }}</strong></td>
               <td class="question-text">{{ q.question_text }}</td>
+              <td>{{ q.points }}</td>
               {% set kind = (q.question_kind or 'single') %}
               {% if kind == 'number' %}
                 <td>{{ q.correct_number or "—" }}</td>
@@ -348,6 +350,7 @@
                     data-opt2="{{ q.options[2]|e if q.options|length > 2 else '' }}"
                     data-opt3="{{ q.options[3]|e if q.options|length > 3 else '' }}"
                     data-correct="{{ q.correct_option }}"
+                    data-points="{{ q.points }}"
                   >
                     <span class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.69 3.86 5.45 5.45a1.2 1.2 0 0 1 0 1.69l-9.8 9.8a2 2 0 0 1-1.02.54l-4.13.9a1 1 0 0 1-1.2-1.2l.9-4.13a2 2 0 0 1 .54-1.02l9.8-9.8a1.2 1.2 0 0 1 1.69 0Zm-8.1 13.4-.5 2.3 2.3-.5 8.89-8.9-1.8-1.8-8.89 8.9Z"/></svg></span>
                     <span>Modifica</span>
@@ -364,7 +367,7 @@
               </td>
             </tr>
           {% else %}
-            <tr><td colspan="4">Nessuna domanda inserita.</td></tr>
+            <tr><td colspan="5">Nessuna domanda inserita.</td></tr>
           {% endfor %}
         </tbody>
       </table>
@@ -418,6 +421,7 @@
         </div>
         <div class="dialog-grid-1" style="margin-top:10px;">
           <textarea name="question_text" placeholder="Testo domanda" required></textarea>
+          <input name="points" type="number" min="1" step="1" value="1" required placeholder="Punteggio domanda" />
           <input type="file" name="image_file" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" />
           <small class="muted image-upload-help">Immagine domanda (opzionale).</small>
         </div>
@@ -472,6 +476,7 @@
         <input type="hidden" name="question_kind" id="editQuestionKind" value="single" />
         <div class="dialog-grid-1" style="margin-top:10px;">
           <textarea name="question_text" id="editQuestionText" placeholder="Testo domanda" required></textarea>
+          <input name="points" id="editPoints" type="number" min="1" step="1" value="1" required placeholder="Punteggio domanda" />
           <input type="file" name="image_file" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" />
           <small class="muted image-upload-help" id="editImageHint">Nessuna immagine caricata.</small>
           <div class="image-preview-inline">
@@ -589,6 +594,7 @@
     const editCorrectM1 = document.getElementById("editCorrectM1");
     const editCorrectM2 = document.getElementById("editCorrectM2");
     const editCorrectM3 = document.getElementById("editCorrectM3");
+    const editPoints = document.getElementById("editPoints");
 
     function setEditKind(kind) {
       const isNumber = kind === "number";
@@ -625,6 +631,7 @@
         editOpt1.value = btn.dataset.opt1 || "";
         editOpt2.value = btn.dataset.opt2 || "";
         editOpt3.value = btn.dataset.opt3 || "";
+        if (editPoints) editPoints.value = btn.dataset.points || "1";
         const kind = (btn.dataset.kind || "single").toLowerCase();
         setEditKind(kind);
         if (kind === "number") {

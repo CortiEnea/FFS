@@ -6,6 +6,10 @@
       <p class="muted">Dettaglio completo risposte, errori e punteggio.</p>
     </div>
     <div class="page-actions">
+      <button type="button" onclick="window.print()">Stampa</button>
+      <form method="post" onsubmit="return confirm('Eliminare questo report?');" style="display:inline;">
+        <button type="submit" style="background:linear-gradient(120deg,#b91c1c,#991b1b);">Elimina report</button>
+      </form>
       <a class="btn" href="{{ url_for('trainer.reports') }}">Indietro</a>
     </div>
   </div>

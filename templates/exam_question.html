@@ -2,6 +2,11 @@
 {% block content %}
   <style>
     .exam-shell { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 14px; align-items: start; }
+    .exam-shell, .exam-top, .exam-content { -webkit-user-select: none; user-select: none; }
+    .capture-blur {
+      filter: blur(14px) !important;
+      transition: filter .12s ease;
+    }
     .exam-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
     .exam-top h2 { margin: 0 0 6px 0; }
     .exam-top-actions { display: inline-flex; gap: 10px; flex-wrap: wrap; align-items: center; }
@@ -265,9 +270,8 @@
       </div>
     </aside>
   </div>
-
   <script>
-    let left = {{ remaining_seconds }};
+    let left = Number("{{ remaining_seconds }}");
     const timerEl = document.getElementById("timer");
     const tick = () => {
       const mm = String(Math.floor(left / 60)).padStart(2, "0");
@@ -281,5 +285,87 @@
       setTimeout(tick, 1000);
     };
     tick();
+
+    // Aggressive anti-capture deterrence for exam mode.
+    const warnCapture = async (msg = "Screenshot/print bloccato durante l'esame.") => {
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText("Screenshot bloccato durante l'esame.");
+        }
+      } catch (_) {
+        // ignore clipboard failures
+      }
+      alert(msg);
+    };
+
+    document.addEventListener("contextmenu", (e) => e.preventDefault());
+    document.addEventListener("copy", (e) => e.preventDefault());
+    document.addEventListener("cut", (e) => e.preventDefault());
+    document.addEventListener("dragstart", (e) => e.preventDefault());
+
+    document.addEventListener("keydown", async (e) => {
+      const key = (e.key || "").toLowerCase();
+      const code = (e.code || "").toLowerCase();
+      const isMac = /mac|iphone|ipad|ipod/i.test(navigator.platform) || /mac|iphone|ipad|ipod/i.test(navigator.userAgent);
+      if (
+        key === "printscreen" ||
+        code === "printscreen" ||
+        (e.ctrlKey && (key === "p" || key === "s")) ||
+        (e.metaKey && (key === "p" || key === "s")) ||
+        (e.shiftKey && (key === "printscreen" || code === "printscreen")) ||
+        (e.ctrlKey && e.shiftKey && ["s", "4", "5", "3"].includes(key)) ||
+        (e.metaKey && e.shiftKey && ["s", "4", "5", "3"].includes(key)) ||
+        // Safari/macOS screenshot tooling shortcuts
+        (isMac && e.metaKey && e.shiftKey && (key === "4" || key === "5" || key === "3"))
+      ) {
+        e.preventDefault();
+        await warnCapture();
+      }
+    });
+    window.addEventListener("beforeprint", (e) => {
+      e.preventDefault();
+      warnCapture("Stampa bloccata durante l'esame.");
+    });
+
+    // If the page loses focus/visibility, hide content briefly and warn.
+    const examRoot = document.querySelector(".exam-shell");
+    const hideForSecurity = () => {
+      if (!examRoot) return;
+      examRoot.style.filter = "blur(16px)";
+      examRoot.style.pointerEvents = "none";
+      setTimeout(() => {
+        examRoot.style.filter = "";
+        examRoot.style.pointerEvents = "";
+      }, 1200);
+    };
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        hideForSecurity();
+        warnCapture("Rilevato cambio app/finestra durante l'esame.");
+      }
+    });
+    window.addEventListener("blur", () => {
+      hideForSecurity();
+    });
+
+    // On touch devices (tablet/phone), blur all visible content when app loses focus.
+    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0;
+    if (isTouchDevice) {
+      const blurAll = () => {
+        document.querySelector(".hero")?.classList.add("capture-blur");
+        document.querySelector(".exam-shell")?.classList.add("capture-blur");
+      };
+      const clearAll = () => {
+        document.querySelector(".hero")?.classList.remove("capture-blur");
+        document.querySelector(".exam-shell")?.classList.remove("capture-blur");
+      };
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) blurAll();
+        else clearAll();
+      });
+      window.addEventListener("blur", blurAll);
+      window.addEventListener("focus", clearAll);
+      window.addEventListener("pageshow", clearAll);
+    }
   </script>
 {% endblock %}

@@ -244,16 +244,26 @@ def generate_exam_password(username: str) -> str:
 
 def seed_demo_data():
     """
-    Demo mode: reset + reseed the DB on every start.
+    Demo seeding.
 
-    - Users/questions/sessions are recreated deterministically (with demo passwords).
-    - Exam attempts/reports are always empty (deleted at seed).
-    - Pool attempts history is also cleared at seed.
+    Default behavior:
+    - seed only when DB is empty (first boot), preserving users/reports/passwords on restart.
+
+    Optional reset behavior:
+    - set DEMO_RESET_ON_START=1 to force full reset + reseed on every start.
     """
     seed_image_url = "/static/ffs-logo.svg"
+    force_reset = (os.getenv("DEMO_RESET_ON_START") or "0").strip() == "1"
 
     with get_db() as conn:
-        # Clear runtime data and demo content. Keep schema_migrations intact.
+        users_count = conn.execute("SELECT COUNT(*) AS c FROM users").fetchone()["c"]
+        should_reset = force_reset or int(users_count or 0) == 0
+        if not should_reset:
+            # Keep current state (reports/passwords/users) across restarts.
+            conn.execute("UPDATE users SET is_trainer = 1 WHERE is_admin = 1")
+            return
+
+        # Clear runtime/demo data. Keep schema_migrations intact.
         conn.executescript(
             """
             DELETE FROM exam_answers;
@@ -1321,6 +1331,32 @@ def get_or_create_attempt(user_id: int, session_id: int) -> dict:
         return conn.execute("SELECT * FROM exam_attempts WHERE id = ?", (attempt_id,)).fetchone()
 
 
+def get_in_progress_attempt(user_id: int, session_id: int) -> dict | None:
+    with get_db() as conn:
+        return conn.execute(
+            """
+            SELECT * FROM exam_attempts
+            WHERE user_id = ? AND session_id = ? AND status = 'in_progress'
+            ORDER BY id DESC LIMIT 1
+            """,
+            (user_id, session_id),
+        ).fetchone()
+
+
+def has_completed_attempt(user_id: int, session_id: int) -> bool:
+    with get_db() as conn:
+        row = conn.execute(
+            """
+            SELECT 1 AS found
+            FROM exam_attempts
+            WHERE user_id = ? AND session_id = ? AND status = 'completed'
+            LIMIT 1
+            """,
+            (user_id, session_id),
+        ).fetchone()
+    return bool(row)
+
+
 def get_attempt(attempt_id: int) -> dict | None:
     with get_db() as conn:
         return conn.execute("SELECT * FROM exam_attempts WHERE id = ?", (attempt_id,)).fetchone()
@@ -1383,6 +1419,15 @@ def finish_attempt(attempt_id: int):
             """,
             (datetime.utcnow().isoformat(), attempt_id),
         )
+
+
+def delete_attempt(attempt_id: int) -> bool:
+    with get_db() as conn:
+        row = conn.execute("SELECT id FROM exam_attempts WHERE id = ?", (attempt_id,)).fetchone()
+        if not row:
+            return False
+        conn.execute("DELETE FROM exam_attempts WHERE id = ?", (attempt_id,))
+        return True
 
 
 def build_attempt_report(attempt_id: int) -> dict | None:

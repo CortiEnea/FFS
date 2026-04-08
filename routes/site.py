@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+import random
 
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash
@@ -338,9 +339,20 @@ def exam_start():
             flash("Password esame non valida.", "error")
             return redirect(url_for("site.exam_start"))
 
-        attempt = db.get_or_create_attempt(session["user_id"], exam_session["id"])
+        if db.has_completed_attempt(session["user_id"], exam_session["id"]):
+            flash("Hai già completato questo esame. Non è possibile rifarlo.", "error")
+            return redirect(url_for("site.dashboard"))
+
+        attempt = db.get_in_progress_attempt(session["user_id"], exam_session["id"])
+        if not attempt:
+            attempt = db.get_or_create_attempt(session["user_id"], exam_session["id"])
+
+        # Random question order per participant attempt, stable for this session.
+        ordered_ids = [q["id"] for q in questions]
+        random.shuffle(ordered_ids)
         session["exam_attempt_id"] = attempt["id"]
         session["exam_position"] = 0
+        session["exam_question_order"] = ordered_ids
         return redirect(url_for("site.exam_question"))
 
     return render_template("exam_start.html", exam_session=exam_session, question_count=len(questions))
@@ -372,6 +384,14 @@ def exam_question():
         flash("Nessuna domanda disponibile.", "error")
         return redirect(url_for("site.dashboard"))
 
+    by_id = {q["id"]: q for q in questions}
+    order = session.get("exam_question_order")
+    if not order or len(order) != len(questions) or any(qid not in by_id for qid in order):
+        order = [q["id"] for q in questions]
+        random.shuffle(order)
+        session["exam_question_order"] = order
+    ordered_questions = [by_id[qid] for qid in order]
+
     remaining = _remaining_seconds(attempt, exam_session)
     if remaining == 0:
         db.finish_attempt(attempt_id)
@@ -380,12 +400,12 @@ def exam_question():
     pos = int(session.get("exam_position", 0))
     if pos < 0:
         pos = 0
-    if pos >= len(questions):
-        pos = len(questions) - 1
-    current = questions[pos]
+    if pos >= len(ordered_questions):
+        pos = len(ordered_questions) - 1
+    current = ordered_questions[pos]
     existing = answers_map.get(current["id"])
     nav_items = []
-    for i, q in enumerate(questions):
+    for i, q in enumerate(ordered_questions):
         ans = answers_map.get(q["id"])
         qk = (q.get("question_kind") or "single").strip().lower()
         if ans is None:
@@ -443,7 +463,7 @@ def exam_question():
         )
 
         if action == "save_next":
-            session["exam_position"] = min(pos + 1, len(questions) - 1)
+            session["exam_position"] = min(pos + 1, len(ordered_questions) - 1)
             return redirect(url_for("site.exam_question"))
         if action == "save_prev":
             session["exam_position"] = max(pos - 1, 0)
@@ -456,7 +476,7 @@ def exam_question():
         exam_session=exam_session,
         question=current,
         index=pos + 1,
-        total=len(questions),
+        total=len(ordered_questions),
         answer=existing,
         remaining_seconds=remaining,
         nav_items=nav_items,
@@ -494,9 +514,16 @@ def exam_review():
         db.finish_attempt(attempt_id)
         return redirect(url_for("site.exam_finished", attempt_id=attempt_id))
 
+    by_id = {q["id"]: q for q in questions}
+    order = session.get("exam_question_order")
+    if not order or len(order) != len(questions) or any(qid not in by_id for qid in order):
+        order = [q["id"] for q in questions]
+        session["exam_question_order"] = order
+    ordered_questions = [by_id[qid] for qid in order]
+
     rows = []
     unanswered = 0
-    for i, q in enumerate(questions):
+    for i, q in enumerate(ordered_questions):
         ans = answers_map.get(q["id"])
         standby = bool(ans["is_standby"]) if ans else False
         qk = (q.get("question_kind") or "single").strip().lower()
@@ -550,4 +577,5 @@ def exam_finished(attempt_id: int):
 
     session.pop("exam_attempt_id", None)
     session.pop("exam_position", None)
+    session.pop("exam_question_order", None)
     return render_template("exam_finished.html", report=report)
